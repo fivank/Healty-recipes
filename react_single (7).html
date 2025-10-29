@@ -1,0 +1,2803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HealthyRecipeApp — React Single File</title>
+  <!-- Embed the original stylesheet directly so no external CSS file is needed -->
+  <style>
+    :root{
+      --bg:#0f1216;
+      --panel:#141a22;
+      /* Lighten card background a bit to improve contrast */
+      --card:#213141;
+      --muted:#9fb0c3;
+      --text:#e8eef5;
+      --brand:#37b07b;
+      --brand-2:#2a8f65;
+      --border:#263042;
+      --chip:#1c2a3b;
+      --chip-on:#203a2d;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,#0d1117 0%, #0f1216 100%);color:var(--text);font:15px/1.55 Inter, system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+
+    /* Full-width container (no horizontal margins) */
+    .container{max-width:none;margin:0;padding:12px 0}
+
+    header{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:4px 0 10px;padding:0 10px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800}
+    .brand .logo{width:32px;height:32px;border-radius:10px;background:radial-gradient(60% 80% at 30% 20%, #45d699 0, #2a8f65 40%, #1f5b45 100%);box-shadow:0 6px 18px rgba(55,176,123,.45), inset 0 0 8px rgba(255,255,255,.12)}
+
+    /* Search row */
+    .searchbar{
+      display:flex;
+      flex-direction:column; /* stack search field and button vertically */
+      gap:8px;
+      align-items:stretch;
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:8px 10px;
+      box-shadow:var(--shadow);
+      margin:0 10px;
+    }
+    .search{display:flex;align-items:center;gap:8px;background:#0f141b;border:1px solid var(--border);border-radius:12px;padding:8px 10px;flex:1}
+    .search input{flex:1;background:transparent;border:0;outline:none;color:var(--text);font-size:14px}
+
+    /* When stacked vertically, make the button take full width */
+    .searchbar .btn{
+      width:100%;
+    }
+
+    .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:var(--card);color:var(--text);
+           padding:8px 12px;border-radius:12px;cursor:pointer;transition:.15s ease;box-shadow:0 2px 0 rgba(0,0,0,.2)}
+    .btn:hover{transform:translateY(-1px);border-color:#33507a;background:#202a37}
+    .btn.primary{background:linear-gradient(180deg,var(--brand) 0,var(--brand-2) 100%);border-color:#1e6d4f}
+    .btn.ghost{background:transparent}
+    .btn.sm{padding:6px 8px;border-radius:10px;font-size:13px}
+    .btn.icon{gap:6px}
+
+    .actions-row{display:flex;gap:6px;flex-wrap:wrap;margin:8px 10px 10px 10px;align-items:center}
+    .filters-active{display:flex;gap:6px;flex-wrap:wrap;margin:6px 10px 10px 10px}
+    .chip{
+      background:rgba(55,176,123,0.15);
+      border:1px solid rgba(55,176,123,0.4);
+      color:#cbd8e7;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      display:inline-flex;
+      gap:6px;
+      align-items:center;
+    }
+    .chip .x{cursor:pointer;opacity:.8}
+
+    /* Cards */
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin:0 10px}
+    .card{position:relative;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow);transition:transform 0.2s, box-shadow 0.2s;}
+    .card:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(0,0,0,.4);}
+    .card .top{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+    .name{font-weight:700}
+    .meta{display:flex;gap:8px;align-items:center;color:#c3d2e3;font-size:12px;flex-wrap:wrap;margin-top:6px}
+    /* Default pill style - subtle background and border for minor metrics */
+    .pill{
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid #33485c;
+      background:#10222e;
+      color:#cbd8e7;
+      font-size:12px;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+    /* Highlighted pill for health score */
+    .pill.health{
+      background:var(--brand);
+      border-color:var(--brand-2);
+      color:var(--bg);
+    }
+    .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+    .tag{
+      font-size:11px;
+      background:rgba(55,176,123,0.15);
+      color:#c8d6e5;
+      border:1px solid rgba(55,176,123,0.3);
+      padding:4px 8px;
+      border-radius:999px;
+    }
+    .tag-video{
+      background:rgba(42,143,101,0.18);
+      border-color:rgba(42,143,101,0.4);
+      color:#cae2ff;
+    }
+    .tag-video::before{content:"▶";margin-right:6px;opacity:.9}
+
+    /* Ensure star icon in health pill contrasts with background */
+    .pill.health .ic.star::before { color: var(--bg); }
+    .mini-ingredients{margin-top:8px;color:#ccdae9;font-size:12px;opacity:.9}
+    .actions-card{margin-top:10px;display:flex;gap:6px;justify-content:space-between;flex-wrap:wrap}
+
+    /* Selection checkbox overlay */
+    .select-box{position:absolute;top:10px;right:10px;background:#0f141b;border:1px solid var(--border);border-radius:8px;padding:4px 6px;display:none;align-items:center;gap:6px;font-size:12px}
+    .selecting .select-box{display:inline-flex}
+    .selected .card{outline:2px solid var(--brand-2)}
+    .select-tick{
+      width:14px;
+      height:14px;
+      border:1px solid rgba(55,176,123,0.4);
+      border-radius:4px;
+      background:#0b1410;
+      display:inline-block;
+    }
+    .selected .select-tick{
+      background:var(--brand-2);
+    }
+
+    /* Fullscreen pages */
+    .page{position:fixed;inset:0;background:var(--panel);display:none;z-index:70;overflow:auto}
+    .page header{position:sticky;top:0;background:var(--panel);z-index:1;border-bottom:1px solid var(--border);padding:10px 12px;margin:0;display:flex;align-items:center;justify-content:space-between}
+    .page .wrap{padding:12px 10px;max-width:none;margin:0}
+    .title{font-weight:800}
+    .back{padding:6px 10px;border-radius:10px;border:1px solid var(--border);background:#0f141b;cursor:pointer}
+    .divider{height:1px;background:var(--border);margin:10px 0}
+    .flag{font-size:18px;line-height:1}
+
+    /* Advanced search layout */
+    .grid-adv{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:12px}
+    .block{background:#0f141b;border:1px solid var(--border);border-radius:14px;padding:12px}
+    .block h4{margin:0 0 8px 0;font-size:13px;color:#bcd3ee;text-transform:uppercase;letter-spacing:.3px}
+    .state-list,.flag-list{display:flex;flex-wrap:wrap;gap:8px}
+    .state{
+      border:1px solid rgba(55,176,123,0.4);
+      background:rgba(55,176,123,0.15);
+      color:#d8e7f6;
+      padding:8px 10px;
+      border-radius:999px;
+      font-size:13px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .state.on{
+      background:rgba(55,176,123,0.25);
+      border-color:rgba(55,176,123,0.6);
+    }
+    .flag-item{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      background:rgba(55,176,123,0.15);
+      border:1px solid rgba(55,176,123,0.4);
+      padding:8px 10px;
+      border-radius:999px;
+      cursor:pointer;
+    }
+    .flag-item.on{
+      background:rgba(55,176,123,0.25);
+      border-color:rgba(55,176,123,0.6);
+    }
+    .range{display:grid;gap:10px}
+    .range label{font-size:13px;color:var(--muted);display:flex;justify-content:space-between}
+    .range input[type="range"]{width:100%}
+    .range input[type="number"]{width:100%;padding:8px;border-radius:10px;background:#0a0f14;border:1px solid var(--border);color:var(--text)}
+    .page footer{display:flex;gap:8px;justify-content:flex-end;padding:12px;border-top:1px solid var(--border);background:var(--panel);position:sticky;bottom:0}
+
+    /* Detail page */
+    .row{margin-bottom:16px}
+    .row h5{margin:0 0 8px 0;color:#bcd3ee;text-transform:uppercase;font-size:14px;font-weight:700;letter-spacing:.3px}
+    .block2{background:#0f141b;border:1px solid var(--border);border-radius:14px;padding:10px}
+    .kv{display:flex;gap:8px;flex-wrap:wrap}
+    .fullwidth{margin-left:-12px;margin-right:-12px}
+
+    /* Editor form */
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .field{display:grid;gap:6px}
+    .field label{font-size:12px;color:#bcd3ee;text-transform:uppercase;letter-spacing:.3px}
+    .field input, .field textarea, .field select{
+      width:100%;padding:10px;border-radius:10px;background:#0a0f14;border:1px solid var(--border);color:var(--text);resize:vertical
+    }
+    .inline{display:flex;gap:8px;flex-wrap:wrap}
+
+    /* Compact tag toggles for editor (smaller, scrollable) */
+    .chipwrap{display:flex;flex-wrap:wrap;gap:6px;max-height:120px;overflow:auto;padding:6px;background:#0a0f14;border:1px solid var(--border);border-radius:10px}
+    .chip-tog{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border:1px solid var(--border);border-radius:999px;background:#12202d;color:#cfe6ff;font-size:12px;cursor:pointer;user-select:none}
+    .chip-tog input{appearance:none;width:12px;height:12px;border:1px solid #2e5d87;border-radius:3px;background:#0a1622;display:inline-block}
+    .chip-tog.on{background:#163149;border-color:#2d4f77}
+    .chip-tog.on input{background:#2a8f65;border-color:#2a8f65}
+
+    .tbl{width:100%;border-collapse:separate;border-spacing:0 8px}
+    .tbl th{font-size:12px;color:#9fb0c3;text-align:left}
+    .tbl td{padding:0}
+    .tbl input{width:100%;padding:8px;border-radius:10px;background:#0a0f14;border:1px solid var(--border);color:#fff}
+    .tbl .rowline{display:grid;grid-template-columns:2fr .7fr .7fr auto;gap:8px}
+    .tbl .rowline2{display:grid;grid-template-columns:1.2fr 2fr auto;gap:8px}
+    /*
+     * Buttons used in tables (ingredient/optional/video rows).  We harmonize these
+     * mini buttons with the brand palette and provide subtle color cues for
+     * confirmation (ok) and deletion (danger).  The base mini-btn uses a
+     * brand-tinted background and border.  Individual classes .danger and
+     * .ok override the color and border to provide gentle red/green hints
+     * without clashing with the overall palette.
+     */
+    .mini-btn{
+      padding:6px 8px;
+      border:1px solid rgba(55,176,123,0.4);
+      background:rgba(55,176,123,0.15);
+      color:#cfe6ff;
+      border-radius:10px;
+      cursor:pointer;
+      transition:background-color 0.2s,border-color 0.2s;
+    }
+    .mini-btn:hover{
+      background:rgba(55,176,123,0.3);
+      border-color:rgba(55,176,123,0.6);
+    }
+    .mini-btn.danger{
+      color:#d68888;
+      border-color:#803c3c;
+    }
+    .mini-btn.ok{
+      color:#9fdcae;
+      border-color:#276b47;
+    }
+
+    /* Thumbnail images for video previews */
+    .thumb, .thumb-full {
+      width: 100%;
+      aspect-ratio: 3 / 1;
+      overflow: hidden;
+      border-radius: 12px;
+      margin-top: 8px;
+    }
+    .thumb img, .thumb-full img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Icons */
+    .ic{width:16px;height:16px;display:inline-block;vertical-align:-3px;opacity:.9}
+    .ic.search::before{content:"🔎"} .ic.search{width:12px;height:12px;font-size:12px;vertical-align:-2px}
+    .ic.adv::before{content:"⚙️"} .ic.add::before{content:"➕"} .ic.sel::before{content:"✅"}
+    .ic.imp::before{content:"📥"} .ic.exp::before{content:"📤"} .ic.view::before{content:"👁️"}
+    .ic.edit::before{content:"✏️"} .ic.del::before{content:"🗑️"} .ic.kcal::before{content:"🔥"}
+    .ic.time::before{content:"⏱️"} .ic.star::before{content:"⭐"} .ic.country::before{content:"🏳️"}
+    .ic.tags::before{content:"🏷️"} .ic.back::before{content:"⬅️"} .ic.share::before{content:"🔗"}
+    .ic.all::before{content:"🟩"} .ic.link::before{content:"🔗"}
+
+    /* Additional section icons for detail headings */
+    .ic.ingredients::before{content:"🥬";}
+    .ic.prep::before{content:"🍳";}
+    .ic.optional::before{content:"🌿";}
+    .ic.advprep::before{content:"📖";}
+    .ic.chef::before{content:"👨‍🍳";}
+    .ic.diet::before{content:"🥗";}
+    .ic.videos2::before{content:"🎬";}
+    .ic.info2::before{content:"ℹ️";}
+
+    /* Language tabs for editor */
+    .lang-tabs{
+      display:flex;
+      gap:6px;
+      margin:16px 0;
+    }
+    .tab-btn{
+      flex:1;
+      padding:6px 8px;
+      border-radius:8px;
+      border:1px solid var(--border);
+      background:#10222e;
+      color:var(--text);
+      cursor:pointer;
+      font-size:12px;
+      text-align:center;
+      transition:background-color 0.2s,border-color 0.2s;
+    }
+    .tab-btn.active{
+      background:var(--brand);
+      border-color:var(--brand-2);
+      color:var(--bg);
+    }
+
+    /* Sticky actions row on small screens */
+    @media (max-width: 740px){
+      .actions-row{
+        position:sticky;
+        bottom:0;
+        background:var(--panel);
+        padding:8px 10px;
+        border-top:1px solid var(--border);
+        z-index:60;
+      }
+    }
+
+    /* Hamburger menu */
+    .menu{position:relative}
+    .hamburger{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:#0f141b;cursor:pointer}
+    .hamburger:hover{background:#16202c}
+    /* Ensure the hamburger icon has high contrast for visibility */
+    .hamburger:before{
+      content:"☰";
+      font-size:18px;
+      line-height:1;
+      color:var(--text);
+    }
+    .menu-panel{position:absolute;top:46px;right:0;background:#0f141b;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:6px;min-width:180px;display:none;z-index:99}
+    .menu.open .menu-panel{display:block}
+    .menu-item{display:flex;align-items:center;gap:8px;width:100%;border:1px solid transparent;background:transparent;color:var(--text);padding:8px 10px;border-radius:10px;cursor:pointer}
+    .menu-item:hover{background:#16202c;border-color:#233246}
+    .menu-sep{height:1px;background:var(--border);margin:6px 0}
+    .menu-item .ic{opacity:1}
+
+    .hidden{display:none !important;}
+
+    /* Share options */
+    .share-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+    .share-card{background:#0f141b;border:1px solid var(--border);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px}
+    .share-card button{align-self:flex-start}
+
+    /* Videos list in advanced detail */
+    .videos{display:flex;flex-wrap:wrap;gap:8px}
+    .vid-link{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#112030;color:#cfe6ff;text-decoration:none;font-size:12px}
+    .vid-link:hover{background:#1a2b41}
+    .vid-link .dot{width:6px;height:6px;border-radius:50%;background:#ff4e45;display:inline-block}
+
+    /* Toast notification styling.  Toasts appear near the bottom of the screen
+       when actions such as copying to clipboard complete successfully.  They
+       fade in and out smoothly and do not block user interaction. */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--panel);
+      border: 1px solid var(--brand-2);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 100;
+      transition: opacity 0.3s ease;
+    }
+    .toast.show {
+      opacity: 1;
+    }
+
+    /* Mobile */
+    @media (max-width: 740px){
+      .grid-adv{grid-template-columns:1fr}
+      .grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+      .container{padding:10px 0}
+      .form-grid{grid-template-columns:1fr}
+      .btn{font-size:14px}
+      .btn.sm{font-size:12px}
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <!-- Load React and ReactDOM from CDNs -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <!-- Load Babel to enable JSX in browser -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Our React application code -->
+  <script type="text/babel">
+    // Destructure hooks from React
+    const { useState, useEffect, useMemo } = React;
+
+    // Flag mapping for countries
+    const FLAG = {
+      USA: '🇺🇸',
+      UK: '🇬🇧',
+      'United Kingdom': '🇬🇧',
+      Canada: '🇨🇦',
+      France: '🇫🇷',
+      Netherlands: '🇳🇱',
+      Spain: '🇪🇸',
+      Germany: '🇩🇪',
+      Italy: '🇮🇹',
+      China: '🇨🇳',
+      Japan: '🇯🇵',
+      Thailand: '🇹🇭',
+      Vietnam: '🇻🇳',
+      Peru: '🇵🇪',
+      Mexico: '🇲🇽',
+      Argentina: '🇦🇷',
+      Chile: '🇨🇱',
+      Colombia: '🇨🇴',
+      Ecuador: '🇪🇨',
+      Venezuela: '🇻🇪',
+      Uruguay: '🇺🇾',
+      Paraguay: '🇵🇾',
+      Bolivia: '🇧🇴',
+      Brazil: '🇧🇷',
+      Sweden: '🇸🇪',
+      Norway: '🇳🇴',
+      Denmark: '🇩🇰',
+      Finland: '🇫🇮',
+      Greece: '🇬🇷',
+      Portugal: '🇵🇹'
+    };
+
+    // Tag categories used for advanced filtering
+    const MEAL = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
+    const DIET = [
+      'Vegetarian',
+      'Vegan',
+      'Seafood',
+      'Gluten-Free',
+      'High Protein',
+      'High Fiber',
+      'Beef',
+      'Pork',
+      'Chicken',
+      'Turkey',
+      'Lamb',
+      'Legume',
+      // Additional diet tags for enhanced filtering
+      'Keto',
+      'Power-Food',
+      'Raw',
+      'Comfort Food',
+      'Low Glycemic Index',
+      'Anti-inflammatory',
+      'Barbeque',
+      'Paleo'
+    ];
+    const COURSE = [
+      'Soup',
+      'Side',
+      'Starter',
+      'Dessert',
+      // Additional course tags
+      'Juice',
+      'Cream-Soup',
+      'Smoothy'
+    ];
+
+    // Helpers to load and save recipes to localStorage
+    function loadRecipes() {
+      try {
+        const raw = localStorage.getItem('recipes');
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    // Normalize a recipe to ensure it has an i18n structure.  If no i18n exists,
+    // copy top-level translatable fields into i18n.en.  This allows the app to
+    // consume both legacy recipes (without i18n) and new i18n-based recipes.
+    function normalizeRecipe(r) {
+      if (!r) return r;
+      const translatable = [
+        'name',
+        'tags',
+        'ingredients',
+        'optionalIngredients',
+        'preparationSimple',
+        'preparationAdvanced',
+        'chefTips',
+        'dietitianTips',
+        'videoLinks'
+      ];
+      if (!r.i18n) {
+        const i18n = { en: {} };
+        translatable.forEach(key => {
+          const val = r[key];
+          i18n.en[key] = Array.isArray(val) ? JSON.parse(JSON.stringify(val)) : val;
+        });
+        r.i18n = i18n;
+      }
+      // Ensure root-level tags exist by copying from English translation if missing
+      if (!Array.isArray(r.tags) || r.tags.length === 0) {
+        if (r.i18n && r.i18n.en && Array.isArray(r.i18n.en.tags)) {
+          r.tags = [...r.i18n.en.tags];
+        }
+      }
+      return r;
+    }
+
+    // Default thumbnail URL used when a recipe has no videos or a thumbnail
+    // cannot be retrieved. This image depicts a colorful assortment of fruits
+    // and conveys a healthy lifestyle vibe.
+    const DEFAULT_THUMB =
+      'https://u7.uidownload.com/vector/69/40/vector-round-frame-of-fresh-juicy-fruits-healthy-diet-vegetarianism-and-veganism-eps-thumbnail.jpg';
+    function saveRecipes(rs) {
+      try {
+        localStorage.setItem('recipes', JSON.stringify(rs));
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    // Boolean search helpers adapted from original implementation
+    function tokenizeBoolean(query) {
+      let q = (query || '').trim();
+      if (!q) return null;
+      q = q
+        .replace(/\s+/g, ' ')
+        .replace(/,/g, ' AND ')
+        .replace(/\+/g, ' AND ')
+        .replace(/\//g, ' OR ')
+        .replace(/\s+(AND|OR)\s+/g, ' $1 ');
+      return q;
+    }
+    function buildBooleanPredicate(query) {
+      const tok = tokenizeBoolean(query);
+      if (!tok) return () => true;
+      const out = [];
+      const ops = [];
+      const terms = tok.match(/\(|\)|AND|OR|[^()\s]+/g) || [];
+      const prec = { AND: 2, OR: 1 };
+      for (const t of terms) {
+        if (t === 'AND' || t === 'OR') {
+          while (ops.length && ops[ops.length - 1] !== '(' && prec[ops[ops.length - 1]] >= prec[t]) out.push(ops.pop());
+          ops.push(t);
+        } else if (t === '(') {
+          ops.push(t);
+        } else if (t === ')') {
+          while (ops.length && ops[ops.length - 1] !== '(') out.push(ops.pop());
+          ops.pop();
+        } else {
+          out.push({ term: t.toLowerCase() });
+        }
+      }
+      while (ops.length) out.push(ops.pop());
+      return r => {
+        const stack = [];
+        // Build a haystack string from root-level fields only.  This predicate
+        // is retained for backwards compatibility and legacy recipes that may
+        // not use the i18n structure.  A translation-aware predicate is built
+        // separately via buildLangSearchPredicate().
+        const hay = [
+          r.name,
+          r.country,
+          (r.tags || []).join(' '),
+          (r.ingredients || []).map(i => i.name).join(' '),
+          (r.optionalIngredients || []).map(i => i.name).join(' ')
+        ].join(' ').toLowerCase();
+        for (const node of out) {
+          if (node.term) stack.push(hay.includes(node.term));
+          else {
+            const b = stack.pop();
+            const a = stack.pop();
+            stack.push(node === 'AND' ? a && b : a || b);
+          }
+        }
+        return stack.pop() ?? true;
+      };
+    }
+
+    /**
+     * Build a boolean search predicate that respects the currently selected
+     * language.  It parses the query using the same boolean logic as
+     * buildBooleanPredicate() but constructs a haystack using translated
+     * fields via getLangField().  If a field is missing in the selected
+     * language, it will fall back to English or root-level values.
+     *
+     * @param {string} query The user query string
+     * @param {function} getLangField A function to fetch language-specific
+     *   fields from a recipe, defined in App and captured via closure.
+     * @returns {function} Predicate function taking a recipe and returning
+     *   true if it matches the query, false otherwise.
+     */
+    function buildLangSearchPredicate(query, getLangField) {
+      const tok = tokenizeBoolean(query);
+      if (!tok) return () => true;
+      const out = [];
+      const ops = [];
+      const terms = tok.match(/\(|\)|AND|OR|[^()\s]+/g) || [];
+      const prec = { AND: 2, OR: 1 };
+      for (const t of terms) {
+        if (t === 'AND' || t === 'OR') {
+          while (ops.length && ops[ops.length - 1] !== '(' && prec[ops[ops.length - 1]] >= prec[t]) out.push(ops.pop());
+          ops.push(t);
+        } else if (t === '(') {
+          ops.push(t);
+        } else if (t === ')') {
+          while (ops.length && ops[ops.length - 1] !== '(') out.push(ops.pop());
+          ops.pop();
+        } else {
+          out.push({ term: t.toLowerCase() });
+        }
+      }
+      while (ops.length) out.push(ops.pop());
+      return r => {
+        const stack = [];
+        // Build haystack from translated fields. Use getLangField() to
+        // obtain arrays/strings in the current language or fall back.
+        const { value: nameVal } = getLangField(r, 'name');
+        const { value: tagsVal } = getLangField(r, 'tags');
+        const { value: ingredientsVal } = getLangField(r, 'ingredients');
+        const { value: optionalVal } = getLangField(r, 'optionalIngredients');
+        const hayParts = [];
+        if (nameVal) hayParts.push(Array.isArray(nameVal) ? nameVal.join(' ') : String(nameVal));
+        if (r.country) hayParts.push(r.country);
+        if (tagsVal && Array.isArray(tagsVal)) hayParts.push(tagsVal.join(' '));
+        if (ingredientsVal && Array.isArray(ingredientsVal)) hayParts.push(ingredientsVal.map(i => i.name).join(' '));
+        if (optionalVal && Array.isArray(optionalVal)) hayParts.push(optionalVal.map(i => i.name).join(' '));
+        const hay = hayParts.join(' ').toLowerCase();
+        for (const node of out) {
+          if (node.term) stack.push(hay.includes(node.term));
+          else {
+            const b = stack.pop();
+            const a = stack.pop();
+            stack.push(node === 'AND' ? a && b : a || b);
+          }
+        }
+        return stack.pop() ?? true;
+      };
+    }
+
+    /**
+     * Extract a YouTube video ID from a URL. Supports standard YouTube
+     * watch links (with "v=" param) and youtu.be short links. Returns
+     * null if no ID can be found.
+     * @param {string} url
+     */
+    function extractVideoId(url) {
+      if (!url) return null;
+      try {
+        const u = new URL(url);
+        // Short link, e.g. https://youtu.be/VIDEO_ID
+        if (u.hostname === 'youtu.be') {
+          return u.pathname.replace(/^\//, '');
+        }
+        // Standard YouTube link, e.g. https://www.youtube.com/watch?v=VIDEO_ID
+        if (u.searchParams.has('v')) {
+          return u.searchParams.get('v');
+        }
+        // Embed or other formats can include the ID in the pathname
+        // Example: https://www.youtube.com/embed/VIDEO_ID
+        const parts = u.pathname.split('/');
+        const possibleId = parts.pop() || parts.pop();
+        if (possibleId && /^[A-Za-z0-9_-]{11}$/.test(possibleId)) {
+          return possibleId;
+        }
+      } catch (e) {
+        // ignore URL parsing errors
+      }
+      return null;
+    }
+
+    // Main App component
+    function App() {
+      // Recipes stored in localStorage
+      // Normalize all recipes on load so that legacy recipes gain an i18n.en section.
+      const [recipes, setRecipes] = useState(() => {
+        const loaded = loadRecipes();
+        return Array.isArray(loaded) ? loaded.map(r => normalizeRecipe(r)) : [];
+      });
+      // Search query
+      const [searchQuery, setSearchQuery] = useState('');
+      // Advanced filter state
+      const [advanced, setAdvanced] = useState({
+        meal: new Set(),
+        diet: new Set(),
+        course: new Set(),
+        countries: new Set(),
+        minHealth: 1,
+        maxKcal: null,
+        maxTime: null
+      });
+      // Selection state
+      const [selecting, setSelecting] = useState(false);
+      const [selectedIds, setSelectedIds] = useState(new Set());
+      // Page control: 'list', 'detail', 'advanced', 'editor', 'share'
+      const [currentPage, setCurrentPage] = useState('list');
+      // Current detail recipe
+      const [detailRecipe, setDetailRecipe] = useState(null);
+      const [viewMode, setViewMode] = useState('simple');
+      // Editor state
+      const [editingRecipe, setEditingRecipe] = useState(null);
+      const [isCreate, setIsCreate] = useState(false);
+      // Menu open state
+      const [menuOpen, setMenuOpen] = useState(false);
+      // Share page state
+      const [shareRecipes, setShareRecipes] = useState([]);
+
+      // Toast message state for showing user feedback (e.g. copy to clipboard).
+      // When non-null, a toast appears and is automatically dismissed after a few seconds.
+      const [toastMsg, setToastMsg] = useState(null);
+
+      // Language state and translations
+      const [lang, setLang] = useState('en');
+
+      // Collapse state for advanced filter sections (meal, diet, course, constraints, countries)
+      const [advCollapse, setAdvCollapse] = useState({
+        meal: false,
+        diet: false,
+        course: false,
+        constraints: false,
+        countries: false
+      });
+
+      // Toggle collapse state for advanced search sections
+      const toggleAdvCollapse = key => {
+        setAdvCollapse(prev => ({ ...prev, [key]: !prev[key] }));
+      };
+
+      // Active language tab in the editor for translation fields
+      const [editLangTab, setEditLangTab] = useState('en');
+
+      // Emoji flags for language selector and editor tabs
+      const FLAG_EMOJI = {
+        en: '🇬🇧',
+        es: '🇪🇸',
+        de: '🇩🇪',
+        fr: '🇫🇷'
+      };
+
+      // Optional color map for meal categories (used in advanced filter)
+      const MEAL_COLORS = {
+        Breakfast: 'rgba(245,184,77,0.2)', // yellow
+        Lunch: 'rgba(240,128,60,0.2)',    // orange
+        Dinner: 'rgba(128,90,196,0.2)',   // purple
+        Snack: 'rgba(52,172,131,0.2)'     // teal
+      };
+
+      // Supported language codes for recipe translations
+      const LANGS = ['en', 'es', 'de', 'fr'];
+
+      /**
+       * Retrieve a field from a recipe in the currently selected language.
+       * Returns an object with the value and a warning flag indicating
+       * whether a fallback to English was used.  For array-type fields
+       * (tags, ingredients, optionalIngredients, videoLinks) a clone of
+       * the array is returned to avoid accidental mutation.
+       */
+      const getLangField = (r, field) => {
+        if (r && r.i18n && r.i18n[lang] && r.i18n[lang][field] !== undefined) {
+          const val = r.i18n[lang][field];
+          return { value: Array.isArray(val) ? JSON.parse(JSON.stringify(val)) : val, warning: false };
+        }
+        // fallback to English if available
+        if (r && r.i18n && r.i18n.en && r.i18n.en[field] !== undefined) {
+          const val = r.i18n.en[field];
+          return { value: Array.isArray(val) ? JSON.parse(JSON.stringify(val)) : val, warning: true };
+        }
+        // final fallback to root-level (legacy) if available
+        if (r && r[field] !== undefined) {
+          const val = r[field];
+          return { value: Array.isArray(val) ? JSON.parse(JSON.stringify(val)) : val, warning: false };
+        }
+        // return sensible defaults
+        if (field === 'tags' || field === 'ingredients' || field === 'optionalIngredients' || field === 'videoLinks') {
+          return { value: [], warning: false };
+        }
+        return { value: '', warning: false };
+      };
+      const TRANSLATIONS = {
+        en: {
+          "Add": "Add",
+          "Import": "Import",
+          "Export": "Export",
+          "Reset (forget recipes)": "Reset (forget recipes)",
+          "Search recipes…": "Search recipes…",
+          "Advanced": "Advanced",
+          "Select": "Select",
+          "Cancel Select": "Cancel Select",
+          "Select All": "Select All",
+          "Share": "Share",
+          "Delete": "Delete",
+          "Saved": "Saved",
+          "of": "of",
+          "Advanced Search": "Advanced Search",
+          "Filters": "Filters",
+          "Meal (OR inside)": "Meal (OR inside)",
+          "Diet": "Diet",
+          "Course": "Course",
+          "Constraints": "Constraints",
+          "Minimum Health Rating": "Minimum Health Rating",
+          "Maximum Calories (kcal)": "Maximum Calories (kcal)",
+          "Max Preparation Time (minutes)": "Max Preparation Time (minutes)",
+          "Countries": "Countries",
+          "Reset": "Reset",
+          "Apply": "Apply",
+          "Back": "Back",
+          "View Mode": "View Mode",
+          "Tags": "Tags",
+          "Info": "Info",
+          "Ingredients": "Ingredients",
+          "Preparation": "Preparation",
+          "Optional / Enrichment": "Optional / Enrichment",
+          "Preparation — Advanced": "Preparation — Advanced",
+          "Chef Tips": "Chef Tips",
+          "Dietitian Tips & Macros": "Dietitian Tips & Macros",
+          "Videos": "Videos",
+          "Switch to Advanced": "Switch to Advanced",
+          "Switch to Simple": "Switch to Simple",
+          "View": "View",
+          "Edit": "Edit",
+          "Name": "Name",
+          "Country": "Country",
+          "Meal Tags": "Meal Tags",
+          "Other Tags": "Other Tags",
+          "Health Score (1–10)": "Health Score (1–10)",
+          "Calories (kcal)": "Calories (kcal)",
+          "Time (minutes)": "Time (minutes)",
+          "Difficulty (text)": "Difficulty (text)",
+          "Optional Ingredients": "Optional Ingredients",
+          "Preparation (Simple)": "Preparation (Simple)",
+          "Preparation (Advanced)": "Preparation (Advanced)",
+          "Macros (g)": "Macros (g)",
+          "Protein": "Protein",
+          "Fat": "Fat",
+          "Carbs": "Carbs",
+          "Save": "Save",
+          "Cancel": "Cancel",
+          "Share Selected": "Share Selected",
+          "selected": "selected",
+          "Copy JSON file": "Copy JSON file",
+          "Copies the selected recipes as JSON to the clipboard.": "Copies the selected recipes as JSON to the clipboard.",
+          "Copy recipe(s) to clipboard": "Copy recipe(s) to clipboard",
+          "Copies selected recipes in rich text to the clipboard.": "Copies selected recipes in rich text to the clipboard.",
+          "Copy ingredients to clipboard": "Copy ingredients to clipboard",
+          "Copies all ingredients of the selected recipes to the clipboard, separated as Main and Optional ingredients.": "Copies all ingredients of the selected recipes to the clipboard, separated as Main and Optional ingredients.",
+          "Language": "Language",
+          "English": "English",
+          "Spanish": "Spanish",
+          "German": "German",
+          "French": "French",
+          "Add Recipe": "Add Recipe",
+          "Edit Recipe": "Edit Recipe",
+          "Creating": "Creating",
+          "Editing": "Editing",
+          "Tags (comma separated)": "Tags (comma separated)",
+          "Add ingredient": "Add ingredient",
+          "Add optional": "Add optional",
+          "Add video": "Add video",
+          "Remove": "Remove",
+          "Video title": "Video title",
+          "Dietitian Tips": "Dietitian Tips",
+          "Share JSON": "Share JSON",
+          "Share PDF": "Share PDF",
+          "Share List": "Share List",
+          "Recipe": "Recipe",
+          "Video available": "Video available",
+          "Video": "Video",
+          "Copied to clipboard": "Copied to clipboard",
+          // Tag translations (meal, diet, course)
+          "Breakfast": "Breakfast",
+          "Lunch": "Lunch",
+          "Dinner": "Dinner",
+          "Snack": "Snack",
+          "Vegetarian": "Vegetarian",
+          "Vegan": "Vegan",
+          "Seafood": "Seafood",
+          "Gluten-Free": "Gluten-Free",
+          "High Protein": "High Protein",
+          "High Fiber": "High Fiber",
+          "Beef": "Beef",
+          "Pork": "Pork",
+          "Chicken": "Chicken",
+          "Turkey": "Turkey",
+          "Lamb": "Lamb",
+          "Legume": "Legume",
+          "Keto": "Keto",
+          "Power-Food": "Power-Food",
+          "Raw": "Raw",
+          "Comfort Food": "Comfort Food",
+          "Low Glycemic Index": "Low Glycemic Index",
+          "Anti-inflammatory": "Anti-inflammatory",
+          "Barbeque": "Barbeque",
+          "Paleo": "Paleo",
+          "Soup": "Soup",
+          "Side": "Side",
+          "Starter": "Starter",
+          "Dessert": "Dessert",
+          "Juice": "Juice",
+          "Cream-Soup": "Cream-Soup",
+          "Smoothy": "Smoothy"
+        },
+        es: {
+          "Add": "Añadir",
+          "Import": "Importar",
+          "Export": "Exportar",
+          "Reset (forget recipes)": "Restablecer (olvidar recetas)",
+          "Search recipes…": "Buscar recetas…",
+          "Advanced": "Avanzado",
+          "Select": "Seleccionar",
+          "Cancel Select": "Cancelar selección",
+          "Select All": "Seleccionar todo",
+          "Share": "Compartir",
+          "Delete": "Eliminar",
+          "Saved": "Guardado",
+          "of": "de",
+          "Advanced Search": "Búsqueda avanzada",
+          "Filters": "Filtros",
+          "Meal (OR inside)": "Comida (OR dentro)",
+          "Diet": "Dieta",
+          "Course": "Curso",
+          "Constraints": "Restricciones",
+          "Minimum Health Rating": "Puntuación mínima de salud",
+          "Maximum Calories (kcal)": "Calorías máximas (kcal)",
+          "Max Preparation Time (minutes)": "Tiempo máximo de preparación (minutos)",
+          "Countries": "Países",
+          "Reset": "Restablecer",
+          "Apply": "Aplicar",
+          "Back": "Atrás",
+          "View Mode": "Modo de vista",
+          "Tags": "Etiquetas",
+          "Info": "Información",
+          "Ingredients": "Ingredientes",
+          "Preparation": "Preparación",
+          "Optional / Enrichment": "Opcional / Enriquecimiento",
+          "Preparation — Advanced": "Preparación — Avanzada",
+          "Chef Tips": "Consejos del chef",
+          "Dietitian Tips & Macros": "Consejos del dietista y macros",
+          "Videos": "Videos",
+          "Switch to Advanced": "Cambiar a avanzado",
+          "Switch to Simple": "Cambiar a simple",
+          "View": "Ver",
+          "Edit": "Editar",
+          "Name": "Nombre",
+          "Country": "País",
+          "Meal Tags": "Etiquetas de comida",
+          "Other Tags": "Otras etiquetas",
+          "Health Score (1–10)": "Puntuación de salud (1–10)",
+          "Calories (kcal)": "Calorías (kcal)",
+          "Time (minutes)": "Tiempo (minutos)",
+          "Difficulty (text)": "Dificultad (texto)",
+          "Optional Ingredients": "Ingredientes opcionales",
+          "Preparation (Simple)": "Preparación (simple)",
+          "Preparation (Advanced)": "Preparación (avanzada)",
+          "Macros (g)": "Macros (g)",
+          "Protein": "Proteína",
+          "Fat": "Grasa",
+          "Carbs": "Carbohidratos",
+          "Save": "Guardar",
+          "Cancel": "Cancelar",
+          "Share Selected": "Compartir seleccionados",
+          "selected": "seleccionado(s)",
+          "Copy JSON file": "Copiar archivo JSON",
+          "Copies the selected recipes as JSON to the clipboard.": "Copia las recetas seleccionadas como JSON al portapapeles.",
+          "Copy recipe(s) to clipboard": "Copiar receta(s) al portapapeles",
+          "Copies selected recipes in rich text to the clipboard.": "Copia las recetas seleccionadas en texto enriquecido al portapapeles.",
+          "Copy ingredients to clipboard": "Copiar ingredientes al portapapeles",
+          "Copies all ingredients of the selected recipes to the clipboard, separated as Main and Optional ingredients.": "Copia todos los ingredientes de las recetas seleccionadas al portapapeles, separados en principales y opcionales.",
+          "Language": "Idioma",
+          "English": "Inglés",
+          "Spanish": "Español",
+          "German": "Alemán",
+          "French": "Francés",
+          "Add Recipe": "Añadir receta",
+          "Edit Recipe": "Editar receta",
+          "Creating": "Creando",
+          "Editing": "Editando",
+          "Tags (comma separated)": "Etiquetas (separadas por coma)",
+          "Add ingredient": "Añadir ingrediente",
+          "Add optional": "Añadir opcional",
+          "Add video": "Añadir video",
+          "Remove": "Eliminar",
+          "Video title": "Título del video",
+          "Dietitian Tips": "Consejos del dietista",
+          "Share JSON": "Compartir JSON",
+          "Share PDF": "Compartir PDF",
+          "Share List": "Compartir lista",
+          "Recipe": "Receta",
+          "Video available": "Video disponible",
+          "Video": "Video",
+          "Copied to clipboard": "Copiado al portapapeles",
+          // Tag translations (meal, diet, course)
+          "Breakfast": "Desayuno",
+          "Lunch": "Almuerzo",
+          "Dinner": "Cena",
+          "Snack": "Snack",
+          "Vegetarian": "Vegetariano",
+          "Vegan": "Vegano",
+          "Seafood": "Mariscos",
+          "Gluten-Free": "Sin Gluten",
+          "High Protein": "Alto en proteína",
+          "High Fiber": "Alto en fibra",
+          "Beef": "Res",
+          "Pork": "Cerdo",
+          "Chicken": "Pollo",
+          "Turkey": "Pavo",
+          "Lamb": "Cordero",
+          "Legume": "Legumbres",
+          "Keto": "Keto",
+          "Power-Food": "Superalimento",
+          "Raw": "Crudo",
+          "Comfort Food": "Comida reconfortante",
+          "Low Glycemic Index": "Bajo índice glucémico",
+          "Anti-inflammatory": "Antiinflamatorio",
+          "Barbeque": "Barbacoa",
+          "Paleo": "Paleo",
+          "Soup": "Sopa",
+          "Side": "Acompañamiento",
+          "Starter": "Entrante",
+          "Dessert": "Postre",
+          "Juice": "Jugo",
+          "Cream-Soup": "Crema",
+          "Smoothy": "Batido"
+        },
+        de: {
+          "Add": "Hinzufügen",
+          "Import": "Importieren",
+          "Export": "Exportieren",
+          "Reset (forget recipes)": "Zurücksetzen (Rezepte vergessen)",
+          "Search recipes…": "Rezepte suchen…",
+          "Advanced": "Erweitert",
+          "Select": "Auswählen",
+          "Cancel Select": "Auswahl abbrechen",
+          "Select All": "Alle auswählen",
+          "Share": "Teilen",
+          "Delete": "Löschen",
+          "Saved": "Gespeichert",
+          "of": "von",
+          "Advanced Search": "Erweiterte Suche",
+          "Filters": "Filter",
+          "Meal (OR inside)": "Mahlzeit (ODER innen)",
+          "Diet": "Ernährung",
+          "Course": "Gang",
+          "Constraints": "Einschränkungen",
+          "Minimum Health Rating": "Mindestgesundheitsbewertung",
+          "Maximum Calories (kcal)": "Maximale Kalorien (kcal)",
+          "Max Preparation Time (minutes)": "Maximale Zubereitungszeit (Minuten)",
+          "Countries": "Länder",
+          "Reset": "Zurücksetzen",
+          "Apply": "Anwenden",
+          "Back": "Zurück",
+          "View Mode": "Ansichtsmodus",
+          "Tags": "Tags",
+          "Info": "Informationen",
+          "Ingredients": "Zutaten",
+          "Preparation": "Zubereitung",
+          "Optional / Enrichment": "Optional / Anreicherung",
+          "Preparation — Advanced": "Zubereitung — Fortgeschritten",
+          "Chef Tips": "Chef-Tipps",
+          "Dietitian Tips & Macros": "Ernährungsberater-Tipps & Makros",
+          "Videos": "Videos",
+          "Switch to Advanced": "Zu Erweitert wechseln",
+          "Switch to Simple": "Zu Einfach wechseln",
+          "View": "Ansicht",
+          "Edit": "Bearbeiten",
+          "Name": "Name",
+          "Country": "Land",
+          "Meal Tags": "Mahlzeit-Tags",
+          "Other Tags": "Andere Tags",
+          "Health Score (1–10)": "Gesundheitswert (1–10)",
+          "Calories (kcal)": "Kalorien (kcal)",
+          "Time (minutes)": "Zeit (Minuten)",
+          "Difficulty (text)": "Schwierigkeit (Text)",
+          "Optional Ingredients": "Optionale Zutaten",
+          "Preparation (Simple)": "Zubereitung (einfach)",
+          "Preparation (Advanced)": "Zubereitung (fortgeschritten)",
+          "Macros (g)": "Makros (g)",
+          "Protein": "Protein",
+          "Fat": "Fett",
+          "Carbs": "Kohlenhydrate",
+          "Save": "Speichern",
+          "Cancel": "Abbrechen",
+          "Share Selected": "Ausgewählte teilen",
+          "selected": "ausgewählt",
+          "Copy JSON file": "JSON-Datei kopieren",
+          "Copies the selected recipes as JSON to the clipboard.": "Kopiert die ausgewählten Rezepte als JSON in die Zwischenablage.",
+          "Copy recipe(s) to clipboard": "Rezept(e) in die Zwischenablage kopieren",
+          "Copies selected recipes in rich text to the clipboard.": "Kopiert ausgewählte Rezepte als Rich Text in die Zwischenablage.",
+          "Copy ingredients to clipboard": "Zutaten in die Zwischenablage kopieren",
+          "Copies all ingredients of the selected recipes to the clipboard, separated as Main and Optional ingredients.": "Kopiert alle Zutaten der ausgewählten Rezepte in die Zwischenablage, getrennt in Haupt- und optionale Zutaten.",
+          "Language": "Sprache",
+          "English": "Englisch",
+          "Spanish": "Spanisch",
+          "German": "Deutsch",
+          "French": "Französisch",
+          "Add Recipe": "Rezept hinzufügen",
+          "Edit Recipe": "Rezept bearbeiten",
+          "Creating": "Erstellen",
+          "Editing": "Bearbeitung",
+          "Tags (comma separated)": "Tags (kommagetrennt)",
+          "Add ingredient": "Zutat hinzufügen",
+          "Add optional": "Optional hinzufügen",
+          "Add video": "Video hinzufügen",
+          "Remove": "Entfernen",
+          "Video title": "Videotitel",
+          "Dietitian Tips": "Diätetische Tipps",
+          "Share JSON": "JSON teilen",
+          "Share PDF": "PDF teilen",
+          "Share List": "Liste teilen",
+          "Recipe": "Rezept",
+          "Video available": "Video verfügbar",
+          "Video": "Video",
+          "Copied to clipboard": "In die Zwischenablage kopiert",
+          // Tag translations (meal, diet, course)
+          "Breakfast": "Frühstück",
+          "Lunch": "Mittagessen",
+          "Dinner": "Abendessen",
+          "Snack": "Snack",
+          "Vegetarian": "Vegetarisch",
+          "Vegan": "Vegan",
+          "Seafood": "Meeresfrüchte",
+          "Gluten-Free": "Glutenfrei",
+          "High Protein": "Eiweißreich",
+          "High Fiber": "Ballaststoffreich",
+          "Beef": "Rind",
+          "Pork": "Schwein",
+          "Chicken": "Hähnchen",
+          "Turkey": "Pute",
+          "Lamb": "Lamm",
+          "Legume": "Hülsenfrüchte",
+          "Keto": "Keto",
+          "Power-Food": "Power-Food",
+          "Raw": "Roh",
+          "Comfort Food": "Hausmannskost",
+          "Low Glycemic Index": "Niedriger glykämischer Index",
+          "Anti-inflammatory": "Entzündungshemmend",
+          "Barbeque": "Barbecue",
+          "Paleo": "Paleo",
+          "Soup": "Suppe",
+          "Side": "Beilage",
+          "Starter": "Vorspeise",
+          "Dessert": "Dessert",
+          "Juice": "Saft",
+          "Cream-Soup": "Cremesuppe",
+          "Smoothy": "Smoothie"
+        },
+        fr: {
+          "Add": "Ajouter",
+          "Import": "Importer",
+          "Export": "Exporter",
+          "Reset (forget recipes)": "Réinitialiser (oublier les recettes)",
+          "Search recipes…": "Rechercher des recettes…",
+          "Advanced": "Avancé",
+          "Select": "Sélectionner",
+          "Cancel Select": "Annuler la sélection",
+          "Select All": "Tout sélectionner",
+          "Share": "Partager",
+          "Delete": "Supprimer",
+          "Saved": "Enregistré",
+          "of": "sur",
+          "Advanced Search": "Recherche avancée",
+          "Filters": "Filtres",
+          "Meal (OR inside)": "Repas (OU à l'intérieur)",
+          "Diet": "Régime",
+          "Course": "Cours",
+          "Constraints": "Contraintes",
+          "Minimum Health Rating": "Note de santé minimale",
+          "Maximum Calories (kcal)": "Calories maximales (kcal)",
+          "Max Preparation Time (minutes)": "Temps de préparation maximal (minutes)",
+          "Countries": "Pays",
+          "Reset": "Réinitialiser",
+          "Apply": "Appliquer",
+          "Back": "Retour",
+          "View Mode": "Mode d'affichage",
+          "Tags": "Étiquettes",
+          "Info": "Infos",
+          "Ingredients": "Ingrédients",
+          "Preparation": "Préparation",
+          "Optional / Enrichment": "Optionnel / Enrichissement",
+          "Preparation — Advanced": "Préparation — Avancée",
+          "Chef Tips": "Conseils du chef",
+          "Dietitian Tips & Macros": "Conseils du diététiste & macros",
+          "Videos": "Vidéos",
+          "Switch to Advanced": "Passer en mode avancé",
+          "Switch to Simple": "Passer en mode simple",
+          "View": "Voir",
+          "Edit": "Modifier",
+          "Name": "Nom",
+          "Country": "Pays",
+          "Meal Tags": "Tags de repas",
+          "Other Tags": "Autres tags",
+          "Health Score (1–10)": "Score santé (1–10)",
+          "Calories (kcal)": "Calories (kcal)",
+          "Time (minutes)": "Temps (minutes)",
+          "Difficulty (text)": "Difficulté (texte)",
+          "Optional Ingredients": "Ingrédients optionnels",
+          "Preparation (Simple)": "Préparation (simple)",
+          "Preparation (Advanced)": "Préparation (avancée)",
+          "Macros (g)": "Macros (g)",
+          "Protein": "Protéine",
+          "Fat": "Lipides",
+          "Carbs": "Glucides",
+          "Save": "Enregistrer",
+          "Cancel": "Annuler",
+          "Share Selected": "Partager les sélectionnés",
+          "selected": "sélectionné(s)",
+          "Copy JSON file": "Copier le fichier JSON",
+          "Copies the selected recipes as JSON to the clipboard.": "Copie les recettes sélectionnées en JSON dans le presse-papiers.",
+          "Copy recipe(s) to clipboard": "Copier la/les recette(s) dans le presse-papiers",
+          "Copies selected recipes in rich text to the clipboard.": "Copie les recettes sélectionnées en texte enrichi dans le presse-papiers.",
+          "Copy ingredients to clipboard": "Copier les ingrédients dans le presse-papiers",
+          "Copies all ingredients of the selected recipes to the clipboard, separated as Main and Optional ingredients.": "Copie tous les ingrédients des recettes sélectionnées dans le presse-papiers, séparés en ingrédients principaux et facultatifs.",
+          "Language": "Langue",
+          "English": "Anglais",
+          "Spanish": "Espagnol",
+          "German": "Allemand",
+          "French": "Français",
+          "Add Recipe": "Ajouter une recette",
+          "Edit Recipe": "Modifier la recette",
+          "Creating": "Création",
+          "Editing": "Modification",
+          "Tags (comma separated)": "Tags (séparés par des virgules)",
+          "Add ingredient": "Ajouter un ingrédient",
+          "Add optional": "Ajouter optionnel",
+          "Add video": "Ajouter une vidéo",
+          "Remove": "Supprimer",
+          "Video title": "Titre de la vidéo",
+          "Dietitian Tips": "Conseils du diététiste",
+          "Share JSON": "Partager JSON",
+          "Share PDF": "Partager PDF",
+          "Share List": "Partager la liste",
+          "Recipe": "Recette",
+          "Video available": "Vidéo disponible",
+          "Video": "Vidéo",
+          "Copied to clipboard": "Copié dans le presse-papiers",
+          // Tag translations (meal, diet, course)
+          "Breakfast": "Petit-déjeuner",
+          "Lunch": "Déjeuner",
+          "Dinner": "Dîner",
+          "Snack": "Collation",
+          "Vegetarian": "Végétarien",
+          "Vegan": "Végétalien",
+          "Seafood": "Fruits de mer",
+          "Gluten-Free": "Sans gluten",
+          "High Protein": "Riche en protéines",
+          "High Fiber": "Riche en fibres",
+          "Beef": "Bœuf",
+          "Pork": "Porc",
+          "Chicken": "Poulet",
+          "Turkey": "Dinde",
+          "Lamb": "Agneau",
+          "Legume": "Légumineuse",
+          "Keto": "Keto",
+          "Power-Food": "Super-aliment",
+          "Raw": "Cru",
+          "Comfort Food": "Plat réconfortant",
+          "Low Glycemic Index": "Index glycémique bas",
+          "Anti-inflammatory": "Anti-inflammatoire",
+          "Barbeque": "Barbecue",
+          "Paleo": "Paléo",
+          "Soup": "Soupe",
+          "Side": "Accompagnement",
+          "Starter": "Entrée",
+          "Dessert": "Dessert",
+          "Juice": "Jus",
+          "Cream-Soup": "Velouté",
+          "Smoothy": "Smoothie"
+        }
+      };
+      const t = (key, vars = {}) => {
+        let str =
+          (TRANSLATIONS[lang] && TRANSLATIONS[lang][key]) ||
+          (TRANSLATIONS['en'] && TRANSLATIONS['en'][key]) ||
+          key;
+        Object.entries(vars).forEach(([k, v]) => {
+          str = str.replace(new RegExp(`\\{${k}\\}`, 'g'), v);
+        });
+        return str;
+      };
+
+      // Persist recipes to localStorage whenever they change
+      useEffect(() => {
+        saveRecipes(recipes);
+      }, [recipes]);
+
+      // Derived predicate for search.  Use a translation-aware predicate that
+      // searches through translated fields via getLangField().  It also
+      // depends on the current language to ensure the predicate updates when
+      // the language changes.  We fall back to English or root-level values
+      // as needed inside buildLangSearchPredicate().
+      const searchPredicate = useMemo(
+        () => buildLangSearchPredicate(searchQuery, getLangField),
+        [searchQuery, lang]
+      );
+
+      // Helper: advanced filter matching
+      const matchesAdvanced = r => {
+        if ((r.healthScore || 0) < (advanced.minHealth || 1)) return false;
+        if (advanced.maxKcal != null && (r.calories || 0) > advanced.maxKcal) return false;
+        if (advanced.maxTime != null && (r.timeMinutes || 9999) > advanced.maxTime) return false;
+        // Meal: OR inside
+        if (advanced.meal.size) {
+          const tags = r.tags || [];
+          if (![...advanced.meal].some(tag => tags.includes(tag))) return false;
+        }
+        // Diet: AND inside
+        for (const t of advanced.diet) {
+          if (!(r.tags || []).includes(t)) return false;
+        }
+        // Course: AND inside
+        for (const t of advanced.course) {
+          if (!(r.tags || []).includes(t)) return false;
+        }
+        // Countries
+        if (advanced.countries.size && !advanced.countries.has(r.country)) return false;
+        return true;
+      };
+
+      // Visible recipes list
+      const visibleRecipes = useMemo(
+        () => recipes.filter(r => searchPredicate(r) && matchesAdvanced(r)),
+        [recipes, searchPredicate, advanced]
+      );
+
+      // Update selection display based on visible list
+      useEffect(() => {
+        setSelectedIds(prev => {
+          const next = new Set(prev);
+          for (const id of prev) {
+            if (!visibleRecipes.some(r => r.id === id)) next.delete(id);
+          }
+          return next;
+        });
+      }, [visibleRecipes]);
+
+      // Helper to compute meal tags for a recipe, returned in the selected language.
+      // Uses the index positions of the original tags to align translations with the
+      // English meal categories defined in MEAL.
+      const mealTagsFor = r => {
+        const transTags = getLangField(r, 'tags').value || [];
+        const original = r.tags || [];
+        const meal = [];
+        for (let i = 0; i < transTags.length; i++) {
+          const orig = original[i];
+          if (orig && MEAL.includes(orig)) meal.push(transTags[i]);
+        }
+        return meal;
+      };
+      // Helper to compute mini ingredient list string using translated ingredient names
+      const miniIngredients = r => {
+        const ing = getLangField(r, 'ingredients').value || [];
+        const opt = getLangField(r, 'optionalIngredients').value || [];
+        const names = ing.map(i => i.name);
+        const extras = opt.map(i => i.name);
+        const all = Array.from(new Set([...names, ...extras]));
+        return all.slice(0, 5).join(' · ') + (all.length > 5 ? ' …' : '');
+      };
+
+      // Page navigation helpers
+      const openDetail = r => {
+        setDetailRecipe(r);
+        setViewMode('simple');
+        setCurrentPage('detail');
+      };
+      const closeDetail = () => {
+        setDetailRecipe(null);
+        setCurrentPage('list');
+      };
+
+      const openAdvanced = () => setCurrentPage('advanced');
+      const closeAdvanced = () => setCurrentPage('list');
+
+      const openEditor = recipe => {
+        if (recipe) {
+          // Editing an existing recipe: clone so edits do not mutate the original until save.
+          setIsCreate(false);
+          // Deep clone recipe
+          const cloned = JSON.parse(JSON.stringify(recipe));
+          // Normalize i18n structure if missing
+          cloned.i18n = cloned.i18n || {};
+          cloned.i18n.en = cloned.i18n.en || {};
+          // If root-level name or other translatable fields are missing, copy from English translation
+          const transFields = ['name','preparationSimple','preparationAdvanced','chefTips','dietitianTips'];
+          transFields.forEach(f => {
+            if (!cloned[f] || cloned[f] === '') {
+              if (cloned.i18n.en && cloned.i18n.en[f] !== undefined) {
+                cloned[f] = cloned.i18n.en[f];
+              }
+            }
+          });
+          // Tags: ensure root-level tags for editing if missing
+          if (!Array.isArray(cloned.tags) || cloned.tags.length === 0) {
+            if (Array.isArray(cloned.i18n.en.tags)) {
+              cloned.tags = [...cloned.i18n.en.tags];
+            }
+          }
+          // If root-level ingredients are missing but translation exists, copy from English translation
+          if (!cloned.ingredients || cloned.ingredients.length === 0) {
+            if (Array.isArray(cloned.i18n.en.ingredients)) {
+              cloned.ingredients = JSON.parse(JSON.stringify(cloned.i18n.en.ingredients));
+            }
+          }
+          // If root-level optionalIngredients are missing but translation exists, copy from English translation
+          if (!cloned.optionalIngredients || cloned.optionalIngredients.length === 0) {
+            if (Array.isArray(cloned.i18n.en.optionalIngredients)) {
+              cloned.optionalIngredients = JSON.parse(JSON.stringify(cloned.i18n.en.optionalIngredients));
+            }
+          }
+          setEditingRecipe(cloned);
+        } else {
+          // Creating a new recipe: initialize fields and set up an empty i18n structure for translations.
+          setIsCreate(true);
+          const newRecipe = {
+            id: null,
+            country: 'Peru',
+            tags: [],
+            ingredients: [],
+            optionalIngredients: [],
+            calories: 0,
+            macros: { protein: 0, fat: 0, carbs: 0 },
+            healthScore: 5,
+            difficulty: 'Easy',
+            timeMinutes: 0,
+            videoLinks: [],
+            // Root-level fields for legacy compatibility. Will be kept in sync with English i18n entries.
+            name: '',
+            preparationSimple: '',
+            preparationAdvanced: '',
+            chefTips: '',
+            dietitianTips: '',
+            // Initialize i18n for all supported languages
+            i18n: {
+              en: { name: '', tags: [], ingredients: [], optionalIngredients: [], preparationSimple: '', preparationAdvanced: '', chefTips: '', dietitianTips: '', videoLinks: [] },
+              es: {},
+              de: {},
+              fr: {}
+            }
+          };
+          setEditingRecipe(newRecipe);
+        }
+        setCurrentPage('editor');
+      };
+      const closeEditor = () => {
+        setEditingRecipe(null);
+        setCurrentPage('list');
+      };
+
+      const openShare = () => {
+        const items = recipes.filter(r => selectedIds.has(r.id));
+        setShareRecipes(items);
+        setCurrentPage('share');
+      };
+      const closeShare = () => setCurrentPage('list');
+
+      // Share the current recipe in detail view without selection
+      const shareCurrentRecipe = () => {
+        if (!detailRecipe) return;
+        setShareRecipes([detailRecipe]);
+        setCurrentPage('share');
+      };
+
+      // Selection mode handlers
+      const enterSelection = () => {
+        setSelecting(true);
+        setSelectedIds(new Set());
+      };
+      const exitSelection = () => {
+        setSelecting(false);
+        setSelectedIds(new Set());
+      };
+      const toggleSelected = id => {
+        setSelectedIds(prev => {
+          const next = new Set(prev);
+          if (next.has(id)) next.delete(id);
+          else next.add(id);
+          return next;
+        });
+      };
+      const selectAllVisible = () => {
+        const ids = new Set(selectedIds);
+        visibleRecipes.forEach(r => ids.add(r.id));
+        setSelectedIds(ids);
+      };
+      const bulkDelete = () => {
+        if (selectedIds.size === 0) return;
+        if (!window.confirm(`Delete ${selectedIds.size} selected recipe(s)?`)) return;
+        setRecipes(recipes.filter(r => !selectedIds.has(r.id)));
+        setSelectedIds(new Set());
+        setSelecting(false);
+      };
+
+      // Delete single recipe
+      const deleteRecipe = id => {
+        if (!window.confirm('Delete this recipe?')) return;
+        setRecipes(recipes.filter(r => r.id !== id));
+      };
+
+      // Add or update recipe
+      const saveEditedRecipe = edited => {
+        // Ensure English translation for translatable fields stays in sync with root-level values
+        if (edited.i18n) {
+          edited.i18n.en = edited.i18n.en || {};
+          // List of translatable fields to sync
+          const transKeys = ['name', 'tags', 'ingredients', 'optionalIngredients', 'preparationSimple', 'preparationAdvanced', 'chefTips', 'dietitianTips', 'videoLinks'];
+          transKeys.forEach(key => {
+            if (edited[key] !== undefined) {
+              const val = edited[key];
+              edited.i18n.en[key] = Array.isArray(val) ? JSON.parse(JSON.stringify(val)) : val;
+            }
+          });
+        }
+        if (!edited.name || !edited.name.trim()) {
+          alert('Please enter a name');
+          return;
+        }
+        if (isCreate) {
+          const slug = edited.name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '');
+          const id = slug + '-' + Math.random().toString(36).slice(2, 6);
+          edited.id = id;
+          setRecipes([edited, ...recipes]);
+        } else {
+          setRecipes(recipes.map(r => (r.id === editingRecipe.id ? edited : r)));
+        }
+        closeEditor();
+        setDetailRecipe(edited);
+        setCurrentPage('detail');
+      };
+
+      // Import recipes from file
+      const importRecipes = e => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const parsed = JSON.parse(reader.result);
+            const items = parsed.recipes || (Array.isArray(parsed) ? parsed : []);
+            if (!Array.isArray(items)) throw new Error('Invalid format');
+            const map = new Map(recipes.map(r => [r.id, r]));
+            items.forEach(r => {
+              if (r && r.id) map.set(r.id, r);
+              else map.set('import-' + Math.random().toString(36).slice(2), r);
+            });
+            setRecipes(Array.from(map.values()));
+          } catch (err) {
+            alert('Import failed: ' + err.message);
+          }
+        };
+        reader.readAsText(file);
+        e.target.value = '';
+      };
+
+      // Export all recipes as JSON
+      const exportRecipes = () => {
+        const payload = {
+          app: 'HealthyRecipeApp',
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          count: recipes.length,
+          recipes
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], {
+          type: 'application/json'
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `recipes-${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      };
+
+      // Reset all recipes
+      const resetRecipes = () => {
+        if (!window.confirm('This will remove all saved recipes from this browser. Continue?')) return;
+        localStorage.setItem('recipes', '[]');
+        setRecipes([]);
+        setAdvanced({
+          meal: new Set(),
+          diet: new Set(),
+          course: new Set(),
+          countries: new Set(),
+          minHealth: 1,
+          maxKcal: null,
+          maxTime: null
+        });
+        setSearchQuery('');
+        setSelecting(false);
+        setSelectedIds(new Set());
+      };
+
+      // Helper for download (share)
+      const shareBlob = (filename, mime, content) => {
+        const blob = new Blob([content], { type: mime });
+        const file = new File([blob], filename, { type: mime });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator
+            .share({ files: [file], title: 'Recipes', text: 'Shared from HealthyRecipeApp' })
+            .catch(() => {});
+        } else {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          alert('Sharing not supported here. File downloaded instead.');
+        }
+      };
+
+      // Share actions
+      // Copy selected recipes as JSON to the clipboard and invoke the share sheet if available
+      const copyJsonToClipboard = async () => {
+        const items = shareRecipes;
+        const payload = {
+          app: 'HealthyRecipeApp',
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          count: items.length,
+          recipes: items
+        };
+        const jsonString = JSON.stringify(payload, null, 2);
+        try {
+          await navigator.clipboard.writeText(jsonString);
+        } catch (e) {
+          console.warn('Clipboard write failed', e);
+        }
+        tryShare(jsonString);
+      };
+
+      // Copy selected recipes in a readable rich text (plain text) format and share
+      const copyRecipesToClipboard = async () => {
+        const lines = [];
+        shareRecipes.forEach(r => {
+          const { value: nm } = getLangField(r, 'name');
+          const { value: tagsVal } = getLangField(r, 'tags');
+          const { value: ings } = getLangField(r, 'ingredients');
+          const { value: optIngs } = getLangField(r, 'optionalIngredients');
+          const { value: prepSimple } = getLangField(r, 'preparationSimple');
+          const { value: prepAdv } = getLangField(r, 'preparationAdvanced');
+          const { value: chefTips } = getLangField(r, 'chefTips');
+          const { value: dietTips } = getLangField(r, 'dietitianTips');
+          lines.push(`${nm || ''}`);
+          if (Array.isArray(tagsVal) && tagsVal.length) {
+            lines.push(`Tags: ${tagsVal.join(', ')}`);
+          }
+          lines.push(
+            `Health: ${r.healthScore ?? '-'} / 10 · ${r.calories ?? '—'} kcal · ${r.timeMinutes ?? '—'} min · ${r.country || ''}`
+          );
+          if (Array.isArray(ings) && ings.length) {
+            lines.push('Ingredients:');
+            ings.forEach(i => {
+              lines.push(` - ${i.name}${i.quantity ? ` — ${i.quantity} ${i.unit || ''}` : ''}`);
+            });
+          }
+          if (Array.isArray(optIngs) && optIngs.length) {
+            lines.push('Optional:');
+            optIngs.forEach(i => {
+              lines.push(` - ${i.name}${i.quantity ? ` — ${i.quantity} ${i.unit || ''}` : ''}`);
+            });
+          }
+          if (prepSimple) {
+            lines.push('Preparation (Simple):');
+            lines.push(prepSimple);
+          }
+          if (prepAdv) {
+            lines.push('Preparation (Advanced):');
+            lines.push(prepAdv);
+          }
+          if (chefTips) {
+            lines.push('Chef Tips:');
+            lines.push(chefTips);
+          }
+          if (dietTips) {
+            lines.push('Dietitian Tips:');
+            lines.push(dietTips);
+          }
+          lines.push('');
+        });
+        const text = lines.join('\n');
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch (e) {
+          console.warn('Clipboard write failed', e);
+        }
+        tryShare(text);
+      };
+
+      // Copy combined ingredients for selected recipes (unique, names only) and share
+      const copyIngredientsToClipboard = async () => {
+        const mainSet = new Set();
+        const optSet = new Set();
+        shareRecipes.forEach(r => {
+          const { value: ings } = getLangField(r, 'ingredients');
+          const { value: optIngs } = getLangField(r, 'optionalIngredients');
+          (Array.isArray(ings) ? ings : []).forEach(i => {
+            if (i && i.name) mainSet.add(i.name);
+          });
+          (Array.isArray(optIngs) ? optIngs : []).forEach(i => {
+            if (i && i.name) optSet.add(i.name);
+          });
+        });
+        const lines = [];
+        lines.push('Main ingredients:');
+        Array.from(mainSet).sort().forEach(name => {
+          lines.push(` - ${name}`);
+        });
+        lines.push('');
+        lines.push('Optional ingredients:');
+        Array.from(optSet).sort().forEach(name => {
+          lines.push(` - ${name}`);
+        });
+        const text = lines.join('\n');
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch (e) {
+          console.warn('Clipboard write failed', e);
+        }
+        tryShare(text);
+      };
+
+      // Helper to invoke the native share sheet when available.  Always
+      // displays a toast to confirm that content has been copied to the
+      // clipboard.  On devices that support the Web Share API, it will
+      // open the share sheet.  Otherwise, the toast alone provides
+      // feedback.
+      const tryShare = content => {
+        // Show toast to confirm copy
+        showToast(t('Copied to clipboard'));
+        if (navigator.canShare && navigator.share) {
+          navigator
+            .share({ text: content, title: 'Recipes' })
+            .catch(() => {});
+        }
+      };
+
+      // Advanced filter toggles
+      const toggleFilterSet = (group, value) => {
+        setAdvanced(prev => {
+          const next = { ...prev };
+          const set = new Set(next[group]);
+          if (set.has(value)) set.delete(value);
+          else set.add(value);
+          next[group] = set;
+          return next;
+        });
+      };
+      const toggleCountry = country => {
+        setAdvanced(prev => {
+          const next = { ...prev };
+          const set = new Set(next.countries);
+          if (set.has(country)) set.delete(country);
+          else set.add(country);
+          next.countries = set;
+          return next;
+        });
+      };
+      const clearAdvanced = () => {
+        setAdvanced({
+          meal: new Set(),
+          diet: new Set(),
+          course: new Set(),
+          countries: new Set(),
+          minHealth: 1,
+          maxKcal: null,
+          maxTime: null
+        });
+      };
+      const applyAdvanced = () => {
+        setCurrentPage('list');
+      };
+
+      /**
+       * Display a toast message on screen.  The toast will appear near the bottom
+       * of the screen and automatically disappear after a few seconds.  Multiple
+       * calls will reset the timer.
+       * @param {string} msg
+       */
+      const showToast = msg => {
+        setToastMsg(msg);
+      };
+
+      // Whenever toastMsg changes, set up a timeout to clear it after 3 seconds
+      useEffect(() => {
+        if (toastMsg) {
+          const timer = setTimeout(() => setToastMsg(null), 3000);
+          return () => clearTimeout(timer);
+        }
+      }, [toastMsg]);
+
+      // Helper to collect available countries
+      const collectCountries = useMemo(() => {
+        const base = [
+          'USA','UK','Canada','France','Netherlands','Spain','Germany','Italy','China','Japan','Thailand','Vietnam',
+          'Peru','Mexico','Argentina','Chile','Colombia','Ecuador','Venezuela','Uruguay','Paraguay','Bolivia','Brazil',
+          'Sweden','Norway','Denmark','Finland'
+        ];
+        const have = Array.from(new Set(recipes.map(r => r.country).filter(Boolean)));
+        const all = Array.from(new Set([...have, ...base]));
+        return all.sort();
+      }, [recipes]);
+
+      // Active filter chips for display
+      const activeFilterChips = [];
+      // Create individual chips for each selected value so users can remove them one-by-one
+      if (advanced.meal.size) {
+        for (const m of advanced.meal) {
+          activeFilterChips.push({
+            label: m,
+            onRemove: () => setAdvanced(prev => {
+              const setNew = new Set(prev.meal);
+              setNew.delete(m);
+              return { ...prev, meal: setNew };
+            })
+          });
+        }
+      }
+      if (advanced.diet.size) {
+        for (const d of advanced.diet) {
+          activeFilterChips.push({
+            label: d,
+            onRemove: () => setAdvanced(prev => {
+              const setNew = new Set(prev.diet);
+              setNew.delete(d);
+              return { ...prev, diet: setNew };
+            })
+          });
+        }
+      }
+      if (advanced.course.size) {
+        for (const c of advanced.course) {
+          activeFilterChips.push({
+            label: c,
+            onRemove: () => setAdvanced(prev => {
+              const setNew = new Set(prev.course);
+              setNew.delete(c);
+              return { ...prev, course: setNew };
+            })
+          });
+        }
+      }
+      if (advanced.countries.size) {
+        for (const ct of advanced.countries) {
+          activeFilterChips.push({
+            label: ct,
+            onRemove: () => setAdvanced(prev => {
+              const setNew = new Set(prev.countries);
+              setNew.delete(ct);
+              return { ...prev, countries: setNew };
+            })
+          });
+        }
+      }
+      if (advanced.minHealth && advanced.minHealth > 1)
+        activeFilterChips.push({ label: `Health ≥ ${advanced.minHealth}`, onRemove: () => setAdvanced(prev => ({ ...prev, minHealth: 1 })) });
+      if (advanced.maxKcal != null)
+        activeFilterChips.push({ label: `Kcal ≤ ${advanced.maxKcal}`, onRemove: () => setAdvanced(prev => ({ ...prev, maxKcal: null })) });
+      if (advanced.maxTime != null)
+        activeFilterChips.push({ label: `Time ≤ ${advanced.maxTime}m`, onRemove: () => setAdvanced(prev => ({ ...prev, maxTime: null })) });
+
+      // Render functions for pages
+      const renderListPage = () => (
+        <div className="container">
+          <header>
+            <div className="brand">
+              <div className="logo" aria-hidden="true"></div>
+              <div>HealthyRecipeApp</div>
+            </div>
+            {/* Hamburger menu */}
+            <div className={`menu${menuOpen ? ' open' : ''}`} id="menu">
+              <button className="hamburger" onClick={e => { e.stopPropagation(); setMenuOpen(!menuOpen); }} aria-label="Menu"></button>
+              <div className="menu-panel" role="menu" aria-labelledby="hamburger">
+            <button className="menu-item" onClick={() => { setMenuOpen(false); openEditor(null); }}><span className="ic add"></span> {t('Add')}</button>
+                <div className="menu-sep"></div>
+                <button className="menu-item" onClick={() => { setMenuOpen(false); exportRecipes(); }}><span className="ic exp"></span> {t('Export')}</button>
+                <button className="menu-item">
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, cursor: 'pointer' }}>
+                    <span className="ic imp"></span> {t('Import')}
+                    <input type="file" accept=".json,application/json" style={{ display: 'none' }} onChange={importRecipes} />
+                  </label>
+                </button>
+                <div className="menu-sep"></div>
+                <button className="menu-item" onClick={() => { setMenuOpen(false); resetRecipes(); }}><span className="ic del"></span> {t('Reset (forget recipes)')}</button>
+                {/* Language selector */}
+                <div className="menu-sep"></div>
+                <div style={{ padding: '4px 10px', fontSize: '12px', fontWeight: 700, opacity: 0.7 }}>{t('Language')}</div>
+                <button className="menu-item" onClick={() => { setLang('en'); setMenuOpen(false); }}>
+                  {FLAG_EMOJI.en} {t('English')}
+                </button>
+                <button className="menu-item" onClick={() => { setLang('es'); setMenuOpen(false); }}>
+                  {FLAG_EMOJI.es} {t('Spanish')}
+                </button>
+                <button className="menu-item" onClick={() => { setLang('de'); setMenuOpen(false); }}>
+                  {FLAG_EMOJI.de} {t('German')}
+                </button>
+                <button className="menu-item" onClick={() => { setLang('fr'); setMenuOpen(false); }}>
+                  {FLAG_EMOJI.fr} {t('French')}
+                </button>
+              </div>
+            </div>
+          </header>
+          {/* Search bar */}
+          <div className="searchbar">
+            <div className="search" title="Boolean: comma/+ = AND, / = OR, parentheses ()">
+              <span className="ic search" aria-hidden="true"></span>
+              <input
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder={t('Search recipes…')}
+              />
+            </div>
+            <button className="btn sm icon" onClick={openAdvanced}><span className="ic adv"></span>{t('Advanced')}</button>
+          </div>
+          {/* Actions row */}
+          <div className="actions-row" id="topActions">
+            {/* Hidden Add button for wiring - we use menu Add */}
+            <button className="btn sm icon hidden" id="btnAdd"><span className="ic add"></span>Add</button>
+            <button className="btn sm icon" onClick={() => (selecting ? exitSelection() : enterSelection())}>
+              <span className="ic sel"></span>{selecting ? t('Cancel Select') : t('Select')}
+            </button>
+            {/* Hidden Import/Export buttons - menu handles these */}
+            <button className="btn sm icon hidden" id="btnImport"><span className="ic imp"></span>Import</button>
+            <button className="btn sm icon hidden" id="btnExport"><span className="ic exp"></span>Export</button>
+            {/* Selection-mode controls */}
+            {selecting && (
+              <>
+                <button className="btn sm icon" onClick={selectAllVisible}><span className="ic all"></span>{t('Select All')}</button>
+                <button className="btn sm icon" onClick={openShare}><span className="ic share"></span>{t('Share')}</button>
+                <button className="btn sm icon danger" onClick={bulkDelete}><span className="ic del"></span>{t('Delete')}</button>
+              </>
+            )}
+            <span className="chip">{t('Saved')}: <strong id="statCount">{visibleRecipes.length} {t('of')} {recipes.length}</strong></span>
+          </div>
+          {/* Active filters */}
+          <div className="filters-active" id="activeFilters">
+            {activeFilterChips.map((chip, idx) => (
+              <span key={idx} className="chip">
+                {chip.label} <span className="x" onClick={chip.onRemove}>✕</span>
+              </span>
+            ))}
+          </div>
+          {/* Recipe grid */}
+          <div className="grid" id="grid">
+            {visibleRecipes.map(r => {
+              const selected = selectedIds.has(r.id);
+              // Fetch translated fields with fallback
+              const { value: nameVal, warning: nameWarn } = getLangField(r, 'name');
+              const { value: tagsVal } = getLangField(r, 'tags');
+              // Derive translated meal and other tags preserving original positions
+              const mealTranslated = [];
+              const otherTranslated = [];
+              const originalTags = r.tags || [];
+              for (let i = 0; i < tagsVal.length; i++) {
+                const orig = originalTags[i];
+                const translated = tagsVal[i];
+                if (orig && MEAL.includes(orig)) mealTranslated.push(translated);
+                else otherTranslated.push(translated);
+              }
+              // Determine thumbnail URL using the first available video link (translated or root-level)
+              let thumbUrl = null;
+              const vidsVal = getLangField(r, 'videoLinks').value || [];
+              let firstVideo = null;
+              if (Array.isArray(vidsVal) && vidsVal.length > 0) {
+                firstVideo = vidsVal[0];
+              } else if (Array.isArray(r.videoLinks) && r.videoLinks.length > 0) {
+                firstVideo = r.videoLinks[0];
+              }
+              if (firstVideo && firstVideo.url) {
+                const vidId = extractVideoId(firstVideo.url);
+                if (vidId) {
+                  // Use hqdefault.jpg for YouTube thumbnails since maxres might not exist or may be blocked
+                  thumbUrl = `https://img.youtube.com/vi/${vidId}/hqdefault.jpg`;
+                }
+              }
+              // If no thumbnail is derived, use the default image
+              if (!thumbUrl) {
+                thumbUrl = DEFAULT_THUMB;
+              }
+              return (
+                <div
+                  key={r.id}
+                  className={`card${selecting ? ' selecting' : ''}${selected ? ' selected' : ''}`}
+                  onClick={e => {
+                    // In selection mode, allow clicking anywhere except buttons to toggle selection
+                    if (selecting) {
+                      if (e.target.closest('button')) return;
+                      toggleSelected(r.id);
+                    }
+                    // When not selecting, ignore card clicks; only the "View" button triggers detail view
+                  }}
+                >
+                  <div className="top">
+                    <div className="name">
+                      {nameVal || ''}
+                      {nameWarn ? (
+                        <span title="English fallback" style={{ fontSize: '11px', marginLeft: '4px', opacity: 0.6 }}>*</span>
+                      ) : null}
+                    </div>
+                    <div className="pill health"><span className="ic star"></span>{r.healthScore ?? '-'}</div>
+                  </div>
+                  {/* Thumbnail between title and meta */}
+                  {thumbUrl ? (
+                    <div className="thumb">
+                      <img
+                        src={thumbUrl}
+                        alt={nameVal || ''}
+                        onError={e => {
+                          e.target.onerror = null;
+                          e.target.src = DEFAULT_THUMB;
+                        }}
+                      />
+                    </div>
+                  ) : null}
+                  <div className="meta">
+                    <span className="pill"><span className="ic kcal"></span>{r.calories ?? '—'} kcal</span>
+                    <span className="pill"><span className="ic time"></span>{r.timeMinutes ?? '—'} min</span>
+                    <span className="pill"><span className="ic country"></span>{FLAG[r.country] || '🏳️'} {r.country || ''}</span>
+                  </div>
+                  <div className="tags">
+                    {mealTranslated.map((t, i) => (
+                      <span key={'mt-' + i} className="tag">{t}</span>
+                    ))}
+                    {otherTranslated.slice(0, 3).map((t, i) => (
+                      <span key={'ot-' + i} className="tag">{t}</span>
+                    ))}
+                    {r.videoLinks && r.videoLinks.length > 0 ? (
+                      <span className="tag tag-video" title={t('Video available')}>{t('Video')}</span>
+                    ) : null}
+                  </div>
+                    <div className="mini-ingredients">{miniIngredients(r)}</div>
+                    <div className="select-box">
+                      <span className="select-tick"></span>{t('Select')}
+                    </div>
+                    <div className="actions-card">
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <button className="btn sm icon" onClick={() => openDetail(r)}><span className="ic view"></span>{t('View')}</button>
+                      </div>
+                      <button className="btn sm icon ghost" onClick={() => deleteRecipe(r.id)}><span className="ic del"></span>{t('Delete')}</button>
+                    </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+
+      const renderAdvancedPage = () => (
+        <section className="page" style={{ display: 'block' }} id="pageAdvanced">
+          <header>
+            <button className="back" onClick={closeAdvanced}><span className="ic back"></span> {t('Back')}</button>
+            <div className="title">{t('Advanced Search')}</div>
+            <div style={{ opacity: 0.7, fontSize: '12px' }}>{t('Filters')}</div>
+          </header>
+          <div className="wrap">
+            <div className="grid-adv">
+              {/* Meal, Diet, Course */}
+              <div className="block">
+                {/* Meal Section */}
+                <h4 onClick={() => toggleAdvCollapse('meal')} style={{ cursor: 'pointer' }}>
+                  {advCollapse.meal ? '▾' : '▸'} {t('Meal (OR inside)')}
+                </h4>
+                {advCollapse.meal && (
+                  <div className="state-list">
+                    {MEAL.map(m => (
+                      <div
+                        key={m}
+                        className={`state${advanced.meal.has(m) ? ' on' : ''}`}
+                        onClick={() => toggleFilterSet('meal', m)}
+                        style={{ background: MEAL_COLORS[m] || undefined, borderColor: MEAL_COLORS[m] || undefined }}
+                      >
+                        {t(m)}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="divider"></div>
+                {/* Diet Section */}
+                <h4 onClick={() => toggleAdvCollapse('diet')} style={{ cursor: 'pointer' }}>
+                  {advCollapse.diet ? '▾' : '▸'} {t('Diet')}
+                </h4>
+                {advCollapse.diet && (
+                  <div className="state-list">
+                    {[...new Set(DIET)].map(d => (
+                      <div
+                        key={d}
+                        className={`state${advanced.diet.has(d) ? ' on' : ''}`}
+                        onClick={() => toggleFilterSet('diet', d)}
+                      >
+                        {t(d)}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div style={{ height: '8px' }}></div>
+                {/* Course Section */}
+                <h4 onClick={() => toggleAdvCollapse('course')} style={{ cursor: 'pointer' }}>
+                  {advCollapse.course ? '▾' : '▸'} {t('Course')}
+                </h4>
+                {advCollapse.course && (
+                  <div className="state-list">
+                    {COURSE.map(c => (
+                      <div
+                        key={c}
+                        className={`state${advanced.course.has(c) ? ' on' : ''}`}
+                        onClick={() => toggleFilterSet('course', c)}
+                      >
+                        {t(c)}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {/* Constraints */}
+              <div className="block">
+                <h4 onClick={() => toggleAdvCollapse('constraints')} style={{ cursor: 'pointer' }}>
+                  {advCollapse.constraints ? '▾' : '▸'} {t('Constraints')}
+                </h4>
+                {advCollapse.constraints && (
+                  <div className="range">
+                    <label>
+                      {t('Minimum Health Rating')} <span>{advanced.minHealth}/10</span>
+                    </label>
+                    <input
+                      type="range"
+                      min="1"
+                      max="10"
+                      step="1"
+                      value={advanced.minHealth}
+                      onChange={e => setAdvanced(prev => ({ ...prev, minHealth: parseInt(e.target.value, 10) }))}
+                    />
+                    <label>
+                      {t('Maximum Calories (kcal)')} <span>{advanced.maxKcal != null ? advanced.maxKcal : '—'}</span>
+                    </label>
+                    {/* Range slider for Max Calories */}
+                    <input
+                      type="range"
+                      min="0"
+                      max="3000"
+                      step="10"
+                      value={advanced.maxKcal != null ? advanced.maxKcal : 0}
+                      onChange={e => {
+                        const v = parseInt(e.target.value, 10);
+                        setAdvanced(prev => ({ ...prev, maxKcal: v }));
+                      }}
+                    />
+                    {/* Number input for Max Calories */}
+                    <input
+                      type="number"
+                      min="0"
+                      max="3000"
+                      step="10"
+                      value={advanced.maxKcal != null ? advanced.maxKcal : ''}
+                      onChange={e => {
+                        const val = e.target.value.trim();
+                        setAdvanced(prev => ({ ...prev, maxKcal: val === '' ? null : parseInt(val, 10) }));
+                      }}
+                    />
+                    <label>
+                      {t('Max Preparation Time (minutes)')} <span>{advanced.maxTime != null ? advanced.maxTime : '—'}</span>
+                    </label>
+                    {/* Range slider for Max Time */}
+                    <input
+                      type="range"
+                      min="0"
+                      max="180"
+                      step="5"
+                      value={advanced.maxTime != null ? advanced.maxTime : 0}
+                      onChange={e => {
+                        const v = parseInt(e.target.value, 10);
+                        setAdvanced(prev => ({ ...prev, maxTime: v }));
+                      }}
+                    />
+                    {/* Number input for Max Time */}
+                    <input
+                      type="number"
+                      min="0"
+                      max="180"
+                      step="5"
+                      value={advanced.maxTime != null ? advanced.maxTime : ''}
+                      onChange={e => {
+                        const val = e.target.value.trim();
+                        setAdvanced(prev => ({ ...prev, maxTime: val === '' ? null : parseInt(val, 10) }));
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+              {/* Countries */}
+              <div className="block">
+                <h4 onClick={() => toggleAdvCollapse('countries')} style={{ cursor: 'pointer' }}>
+                  {advCollapse.countries ? '▾' : '▸'} {t('Countries')}
+                </h4>
+                {advCollapse.countries && (
+                  <div className="flag-list">
+                    {collectCountries.map(cty => (
+                      <div
+                        key={cty}
+                        className={`flag-item${advanced.countries.has(cty) ? ' on' : ''}`}
+                        onClick={() => toggleCountry(cty)}
+                      >
+                        <span className="flag">{FLAG[cty] || '🏳️'}</span>
+                        <span>{cty}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          <footer>
+            <button className="btn" onClick={() => { clearAdvanced(); closeAdvanced(); }}>
+              {t('Reset')}
+            </button>
+            <button className="btn primary" onClick={applyAdvanced}>{t('Apply')}</button>
+          </footer>
+        </section>
+      );
+
+      const renderDetailPage = () => {
+        if (!detailRecipe) return null;
+        const r = detailRecipe;
+        // Fetch translated fields with fallback for detail view
+        const { value: nameVal, warning: nameWarn } = getLangField(r, 'name');
+        const { value: tagsVal } = getLangField(r, 'tags');
+        const { value: ingredientsVal } = getLangField(r, 'ingredients');
+        const { value: optionalVal } = getLangField(r, 'optionalIngredients');
+        const { value: prepSimpleVal } = getLangField(r, 'preparationSimple');
+        const { value: prepAdvVal } = getLangField(r, 'preparationAdvanced');
+        const { value: chefTipsVal } = getLangField(r, 'chefTips');
+        const { value: dietTipsVal } = getLangField(r, 'dietitianTips');
+        const { value: videosVal } = getLangField(r, 'videoLinks');
+        const macro = r.macros
+          ? `Protein ${r.macros.protein || 0}g · Fat ${r.macros.fat || 0}g · Carbs ${r.macros.carbs || 0}g`
+          : '—';
+        return (
+          <section className="page" style={{ display: 'block' }} id="pageDetail">
+            <header className="fullwidth">
+              <button className="back" onClick={closeDetail}><span className="ic back"></span> {t('Back')}</button>
+              <div className="title">
+                {nameVal || t('Recipe')}
+                {nameWarn ? (
+                  <span title="English fallback" style={{ fontSize: '11px', marginLeft: '4px', opacity: 0.6 }}>*</span>
+                ) : null}
+              </div>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <div className="flag">{FLAG[r.country] || '🏳️'}</div>
+                {/* Share button for current recipe */}
+                <button className="btn sm icon" onClick={shareCurrentRecipe}><span className="ic share"></span>{t('Share')}</button>
+                <button className="btn sm icon" onClick={() => openEditor(r)}><span className="ic edit"></span>{t('Edit')}</button>
+              </div>
+            </header>
+            {/* Insert thumbnail between header and content */}
+            {(() => {
+              let thumbUrl = null;
+              if (videosVal && Array.isArray(videosVal) && videosVal.length > 0) {
+                const vidId = extractVideoId(videosVal[0].url);
+                if (vidId) {
+                  // Use hqdefault.jpg for YouTube thumbnails since maxres might not exist or may be blocked
+                  thumbUrl = `https://img.youtube.com/vi/${vidId}/hqdefault.jpg`;
+                }
+              }
+              // If no thumbnail found, fall back to default image
+              if (!thumbUrl) {
+                thumbUrl = DEFAULT_THUMB;
+              }
+              return thumbUrl ? (
+                <div className="thumb-full">
+                  <img
+                    src={thumbUrl}
+                    alt={nameVal || ''}
+                    onError={e => {
+                      e.target.onerror = null;
+                      e.target.src = DEFAULT_THUMB;
+                    }}
+                  />
+                </div>
+              ) : null;
+            })()}
+            <div className="wrap fullwidth">
+              <div className="row">
+                <h5>{t('View Mode')}</h5>
+                <div className="block2">
+                  <button className="btn sm" onClick={() => setViewMode(viewMode === 'simple' ? 'advanced' : 'simple')}>
+                    {viewMode === 'simple' ? t('Switch to Advanced') : t('Switch to Simple')}
+                  </button>
+                </div>
+              </div>
+              <div className="row">
+                <h5><span className="ic tags"></span> {t('Tags')}</h5>
+                <div className="block2" id="dTags">
+                  {tagsVal.map((tg, i) => (
+                    <span key={i} className="tag" style={{ marginRight: '6px' }}>{tg}</span>
+                  ))}
+                  {videosVal && videosVal.length > 0 ? (
+                    <span className="tag tag-video" title={t('Video available')}>{t('Video')}</span>
+                  ) : null}
+                </div>
+              </div>
+              <div className="row">
+                <h5><span className="ic info2"></span> {t('Info')}</h5>
+                <div className="block2 kv">
+                  <div className="pill health"><span className="ic star"></span>{r.healthScore ?? '-'}/10</div>
+                  <div className="pill"><span className="ic kcal"></span>{r.calories ?? '—'} kcal</div>
+                  <div className="pill"><span className="ic time"></span>{r.timeMinutes ?? '—'} min</div>
+                  <div className="pill"><span className="ic country"></span>{r.country || ''}</div>
+                </div>
+              </div>
+              {viewMode === 'simple' && (
+                <>
+                  <div className="row">
+                    <h5><span className="ic ingredients"></span> {t('Ingredients')}</h5>
+                    <div className="block2" id="dIngr">
+                      {ingredientsVal.length > 0
+                        ? ingredientsVal.map((i, idx) => (
+                            <span key={idx}>{i.name}{i.quantity ? ` — ${i.quantity} ${i.unit || ''}` : ''}{idx < (ingredientsVal.length || 0) - 1 ? ', ' : ''}</span>
+                          ))
+                        : '—'}
+                    </div>
+                  </div>
+                  <div className="row">
+                    <h5><span className="ic prep"></span> {t('Preparation')}</h5>
+                    <div className="block2" id="dPrep">{prepSimpleVal || '—'}</div>
+                  </div>
+                </>
+              )}
+              {viewMode === 'advanced' && (
+                <div id="rowAdvanced">
+                  <div className="row">
+                    <h5><span className="ic ingredients"></span> Ingredients (with quantities)</h5>
+                    <div className="block2">
+                      {ingredientsVal.length > 0 ? (
+                        <ul style={{ margin: 0, paddingLeft: '18px' }}>
+                          {ingredientsVal.map((i, idx) => (
+                            <li key={idx}>
+                              {i.name}
+                              {i.quantity ? ` — ${i.quantity} ${i.unit || ''}` : ''}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        '—'
+                      )}
+                    </div>
+                  </div>
+                  <div className="row">
+                    <h5><span className="ic optional"></span> {t('Optional / Enrichment')}</h5>
+                    <div className="block2">
+                      {optionalVal.length > 0 ? (
+                        <ul style={{ margin: 0, paddingLeft: '18px' }}>
+                          {optionalVal.map((i, idx) => (
+                            <li key={idx}>
+                              {i.name}
+                              {i.quantity ? ` — ${i.quantity} ${i.unit || ''}` : ''}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        '—'
+                      )}
+                    </div>
+                  </div>
+                  <div className="row">
+                    <h5><span className="ic advprep"></span> {t('Preparation — Advanced')}</h5>
+                    <div className="block2">{prepAdvVal || '—'}</div>
+                  </div>
+                  <div className="row">
+                    <h5><span className="ic chef"></span> {t('Chef Tips')}</h5>
+                    <div className="block2">{chefTipsVal || '—'}</div>
+                  </div>
+                  <div className="row">
+                    <h5><span className="ic diet"></span> {t('Dietitian Tips & Macros')}</h5>
+                    <div className="block2">
+                      {dietTipsVal || '—'}
+                      <div className="divider"></div>
+                      {macro}
+                    </div>
+                  </div>
+                  <div className="row">
+                    <h5><span className="ic videos2"></span> {t('Videos')}</h5>
+                    <div className="block2">
+                      {videosVal && videosVal.length > 0 ? (
+                        <div className="videos">
+                          {videosVal.map((v, idx) => (
+                            <a
+                              key={idx}
+                              className="vid-link"
+                              href={v.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <span className="dot"></span>
+                              {v.title || t('Video')}
+                            </a>
+                          ))}
+                        </div>
+                      ) : (
+                        '—'
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        );
+      };
+
+      const renderEditorPage = () => {
+        if (!editingRecipe) return null;
+        const r = editingRecipe;
+        const updateField = (field, value) => {
+          setEditingRecipe(prev => ({ ...prev, [field]: value }));
+        };
+        const updateMacro = (macroField, value) => {
+          setEditingRecipe(prev => ({ ...prev, macros: { ...prev.macros, [macroField]: value } }));
+        };
+        // Ingredient handlers
+        const addIngredient = () => {
+          setEditingRecipe(prev => ({ ...prev, ingredients: [...(prev.ingredients || []), { name: '', quantity: '', unit: '' }] }));
+        };
+        const updateIngredient = (index, key, value) => {
+          setEditingRecipe(prev => {
+            const list = [...(prev.ingredients || [])];
+            list[index] = { ...list[index], [key]: value };
+            return { ...prev, ingredients: list };
+          });
+        };
+        const removeIngredient = index => {
+          setEditingRecipe(prev => {
+            const list = [...(prev.ingredients || [])];
+            list.splice(index, 1);
+            return { ...prev, ingredients: list };
+          });
+        };
+        // Optional ingredients
+        const addOptional = () => {
+          setEditingRecipe(prev => ({ ...prev, optionalIngredients: [...(prev.optionalIngredients || []), { name: '', quantity: '', unit: '' }] }));
+        };
+        const updateOptional = (index, key, value) => {
+          setEditingRecipe(prev => {
+            const list = [...(prev.optionalIngredients || [])];
+            list[index] = { ...list[index], [key]: value };
+            return { ...prev, optionalIngredients: list };
+          });
+        };
+        const removeOptional = index => {
+          setEditingRecipe(prev => {
+            const list = [...(prev.optionalIngredients || [])];
+            list.splice(index, 1);
+            return { ...prev, optionalIngredients: list };
+          });
+        };
+        // Video links
+        const addVideo = () => {
+          setEditingRecipe(prev => ({ ...prev, videoLinks: [...(prev.videoLinks || []), { title: '', url: '' }] }));
+        };
+        const updateVideo = (index, key, value) => {
+          setEditingRecipe(prev => {
+            const list = [...(prev.videoLinks || [])];
+            list[index] = { ...list[index], [key]: value };
+            return { ...prev, videoLinks: list };
+          });
+        };
+        const removeVideo = index => {
+          setEditingRecipe(prev => {
+            const list = [...(prev.videoLinks || [])];
+            list.splice(index, 1);
+            return { ...prev, videoLinks: list };
+          });
+        };
+        // Tags editing: comma separated
+        const updateTags = value => {
+          const tags = value
+            .split(',')
+            .map(t => t.trim())
+            .filter(Boolean);
+          setEditingRecipe(prev => ({ ...prev, tags }));
+        };
+
+        // Language-aware updates for i18n fields in the editor.  Allows editing
+        // translations for all supported languages.  When editing English ('en'),
+        // also update the root-level field for backward compatibility.
+        const updateLangField = (lc, field, value) => {
+          setEditingRecipe(prev => {
+            const next = { ...prev };
+            next.i18n = next.i18n || {};
+            next.i18n[lc] = next.i18n[lc] || {};
+            next.i18n[lc][field] = value;
+            if (lc === 'en') {
+              next[field] = value;
+            }
+            return next;
+          });
+        };
+        const updateLangTags = (lc, value) => {
+          const arr = value
+            .split(',')
+            .map(t => t.trim())
+            .filter(Boolean);
+          updateLangField(lc, 'tags', arr);
+        };
+        return (
+          <section className="page" style={{ display: 'block' }} id="pageEditor">
+            <header>
+              <button className="back" onClick={closeEditor}><span className="ic back"></span> {t('Back')}</button>
+              <div className="title">{isCreate ? t('Add Recipe') : t('Edit Recipe')}</div>
+              <div style={{ opacity: 0.7, fontSize: '12px' }}>{isCreate ? t('Creating') : t('Editing')}</div>
+            </header>
+            <div className="wrap">
+              <div className="form-grid">
+                {/*
+                  Removed Name and Tags fields from the base editor since translations are handled per language.
+                  Retain the Country selector and other numeric/text fields for macros and timing.
+                */}
+                <div className="field">
+                  <label>{t('Country')}</label>
+                  <select value={r.country} onChange={e => updateField('country', e.target.value)}>
+                    {collectCountries.map(cty => (
+                      <option key={cty} value={cty}>{FLAG[cty] || '🏳️'} {cty}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="field">
+                  <label>{t('Health Score (1–10)')}</label>
+                  <input type="number" min="1" max="10" step="1" value={r.healthScore} onChange={e => updateField('healthScore', parseInt(e.target.value, 10))} />
+                </div>
+                <div className="field">
+                  <label>{t('Calories (kcal)')}</label>
+                  <input type="number" min="0" step="1" value={r.calories} onChange={e => updateField('calories', parseInt(e.target.value, 10))} />
+                </div>
+                <div className="field">
+                  <label>{t('Time (minutes)')}</label>
+                  <input type="number" min="0" step="1" value={r.timeMinutes} onChange={e => updateField('timeMinutes', parseInt(e.target.value, 10))} />
+                </div>
+                <div className="field">
+                  <label>{t('Difficulty (text)')}</label>
+                  <input value={r.difficulty} onChange={e => updateField('difficulty', e.target.value)} placeholder="Easy / Medium / Hard" />
+                </div>
+                <div className="field">
+                  <label>{t('Protein')} (g)</label>
+                  <input type="number" min="0" step="1" value={r.macros.protein} onChange={e => updateMacro('protein', parseFloat(e.target.value))} />
+                </div>
+                <div className="field">
+                  <label>{t('Fat')} (g)</label>
+                  <input type="number" min="0" step="1" value={r.macros.fat} onChange={e => updateMacro('fat', parseFloat(e.target.value))} />
+                </div>
+                <div className="field">
+                  <label>{t('Carbs')} (g)</label>
+                  <input type="number" min="0" step="1" value={r.macros.carbs} onChange={e => updateMacro('carbs', parseFloat(e.target.value))} />
+                </div>
+              </div>
+
+              {/* Translation tabs */}
+              <div className="lang-tabs">
+                {LANGS.map(code => (
+                  <button
+                    key={'tab-' + code}
+                    className={'tab-btn' + (editLangTab === code ? ' active' : '')}
+                    onClick={() => setEditLangTab(code)}
+                  >
+                    {FLAG_EMOJI[code]} {code.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+              {/* Language-specific fields for the selected language */}
+              <div className="lang-fields">
+                {(() => {
+                  const lc = editLangTab;
+                  return (
+                    <div key={'lang-' + lc} style={{ marginBottom: '12px' }}>
+                      <h5>{lc.toUpperCase()}</h5>
+                      <div className="field">
+                        <label>{t('Name')} ({lc.toUpperCase()})</label>
+                        <input
+                          value={(r.i18n && r.i18n[lc] && r.i18n[lc].name) || ''}
+                          onChange={e => updateLangField(lc, 'name', e.target.value)}
+                        />
+                      </div>
+                        <div className="field">
+                          <label>{t('Tags (comma separated)')} ({lc.toUpperCase()})</label>
+                          <input
+                            value={((r.i18n && r.i18n[lc] && r.i18n[lc].tags) || []).join(', ')}
+                            onChange={e => updateLangTags(lc, e.target.value)}
+                          />
+                        </div>
+                        <div className="field">
+                          <label>{t('Preparation (Simple)')} ({lc.toUpperCase()})</label>
+                          <textarea
+                            rows="2"
+                            value={(r.i18n && r.i18n[lc] && r.i18n[lc].preparationSimple) || ''}
+                            onChange={e => updateLangField(lc, 'preparationSimple', e.target.value)}
+                          ></textarea>
+                        </div>
+                        <div className="field">
+                          <label>{t('Preparation (Advanced)')} ({lc.toUpperCase()})</label>
+                          <textarea
+                            rows="3"
+                            value={(r.i18n && r.i18n[lc] && r.i18n[lc].preparationAdvanced) || ''}
+                            onChange={e => updateLangField(lc, 'preparationAdvanced', e.target.value)}
+                          ></textarea>
+                        </div>
+                        <div className="field">
+                          <label>{t('Chef Tips')} ({lc.toUpperCase()})</label>
+                          <textarea
+                            rows="2"
+                            value={(r.i18n && r.i18n[lc] && r.i18n[lc].chefTips) || ''}
+                            onChange={e => updateLangField(lc, 'chefTips', e.target.value)}
+                          ></textarea>
+                        </div>
+                        <div className="field">
+                          <label>{t('Dietitian Tips')} ({lc.toUpperCase()})</label>
+                          <textarea
+                            rows="2"
+                            value={(r.i18n && r.i18n[lc] && r.i18n[lc].dietitianTips) || ''}
+                            onChange={e => updateLangField(lc, 'dietitianTips', e.target.value)}
+                          ></textarea>
+                        </div>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* Ingredients table */}
+              <div className="row">
+                <h5>{t('Ingredients')}</h5>
+                <div className="block2">
+                  <table className="tbl" id="tblIngr">
+                    <thead>
+                      <tr><th>Name</th><th>Qty</th><th>Unit</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                      {(r.ingredients || []).map((item, idx) => (
+                        <tr key={idx}>
+                          <td colSpan="4">
+                            <div className="rowline">
+                              <input
+                                placeholder="name"
+                                value={item.name}
+                                onChange={e => updateIngredient(idx, 'name', e.target.value)}
+                              />
+                              <input
+                                placeholder="qty"
+                                type="number"
+                                step="0.1"
+                                value={item.quantity !== undefined && item.quantity !== '' ? item.quantity : ''}
+                                onChange={e => updateIngredient(idx, 'quantity', e.target.value)}
+                              />
+                              <input
+                                placeholder="unit"
+                                value={item.unit || ''}
+                                onChange={e => updateIngredient(idx, 'unit', e.target.value)}
+                              />
+                              <button className="mini-btn danger" onClick={() => removeIngredient(idx)}>{t('Remove')}</button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <div className="inline" style={{ marginTop: '8px' }}>
+                    <button className="mini-btn ok" onClick={addIngredient}>+ {t('Add ingredient')}</button>
+                  </div>
+                </div>
+              </div>
+              {/* Optional ingredients */}
+              <div className="row">
+                <h5>{t('Optional Ingredients')}</h5>
+                <div className="block2">
+                  <table className="tbl" id="tblOpt">
+                    <thead><tr><th>Name</th><th>Qty</th><th>Unit</th><th></th></tr></thead>
+                    <tbody>
+                      {(r.optionalIngredients || []).map((item, idx) => (
+                        <tr key={idx}>
+                          <td colSpan="4">
+                            <div className="rowline">
+                              <input
+                                placeholder="name"
+                                value={item.name}
+                                onChange={e => updateOptional(idx, 'name', e.target.value)}
+                              />
+                              <input
+                                placeholder="qty"
+                                type="number"
+                                step="0.1"
+                                value={item.quantity !== undefined && item.quantity !== '' ? item.quantity : ''}
+                                onChange={e => updateOptional(idx, 'quantity', e.target.value)}
+                              />
+                              <input
+                                placeholder="unit"
+                                value={item.unit || ''}
+                                onChange={e => updateOptional(idx, 'unit', e.target.value)}
+                              />
+                              <button className="mini-btn danger" onClick={() => removeOptional(idx)}>{t('Remove')}</button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <div className="inline" style={{ marginTop: '8px' }}>
+                    <button className="mini-btn ok" onClick={addOptional}>+ {t('Add optional')}</button>
+                  </div>
+                </div>
+              </div>
+              {/* Videos */}
+              <div className="row">
+                <h5>{t('Videos')}</h5>
+                <div className="block2">
+                  <table className="tbl" id="tblVid">
+                    <thead><tr><th>Title</th><th>URL</th><th></th></tr></thead>
+                    <tbody>
+                      {(r.videoLinks || []).map((item, idx) => (
+                        <tr key={idx}>
+                          <td colSpan="3">
+                            <div className="rowline2">
+                              <input
+                                placeholder={t('Video title')}
+                                value={item.title}
+                                onChange={e => updateVideo(idx, 'title', e.target.value)}
+                              />
+                              <input
+                                placeholder="https://youtube.com/..."
+                                value={item.url}
+                                onChange={e => updateVideo(idx, 'url', e.target.value)}
+                              />
+                              <button className="mini-btn danger" onClick={() => removeVideo(idx)}>{t('Remove')}</button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <div className="inline" style={{ marginTop: '8px' }}>
+                    <button className="mini-btn ok" onClick={addVideo}><span className="ic link"></span> {t('Add video')}</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <footer>
+              <button className="btn" onClick={closeEditor}>{t('Cancel')}</button>
+              <button className="btn primary" onClick={() => saveEditedRecipe(editingRecipe)}>{t('Save')}</button>
+            </footer>
+          </section>
+        );
+      };
+
+      const renderSharePage = () => (
+        <section className="page" style={{ display: 'block' }} id="pageShare">
+          <header>
+            <button className="back" onClick={closeShare}><span className="ic back"></span> {t('Back')}</button>
+            <div className="title">{t('Share Selected')}</div>
+            <div style={{ opacity: 0.7, fontSize: '12px' }}>{shareRecipes.length} {t('selected')}</div>
+          </header>
+          <div className="wrap">
+            <div className="share-grid">
+              <div className="share-card">
+                <div style={{ fontWeight: 700 }}>{t('Copy JSON file')}</div>
+                <div className="muted">{t('Copies the selected recipes as JSON to the clipboard.')}</div>
+                <button className="btn sm icon" onClick={copyJsonToClipboard}><span className="ic share"></span>{t('Copy JSON file')}</button>
+              </div>
+              <div className="share-card">
+                <div style={{ fontWeight: 700 }}>{t('Copy recipe(s) to clipboard')}</div>
+                <div className="muted">{t('Copies selected recipes in rich text to the clipboard.')}</div>
+                <button className="btn sm icon" onClick={copyRecipesToClipboard}><span className="ic share"></span>{t('Copy recipe(s) to clipboard')}</button>
+              </div>
+              <div className="share-card">
+                <div style={{ fontWeight: 700 }}>{t('Copy ingredients to clipboard')}</div>
+                <div className="muted">{t('Copies all ingredients of the selected recipes to the clipboard, separated as Main and Optional ingredients.')}</div>
+                <button className="btn sm icon" onClick={copyIngredientsToClipboard}><span className="ic share"></span>{t('Copy ingredients to clipboard')}</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+
+      // Render main component based on current page
+      return (
+        <>
+          {currentPage === 'list' && renderListPage()}
+          {currentPage === 'advanced' && renderAdvancedPage()}
+          {currentPage === 'detail' && renderDetailPage()}
+          {currentPage === 'editor' && renderEditorPage()}
+          {currentPage === 'share' && renderSharePage()}
+          {/* Toast message element.  Appears at bottom when toastMsg is set. */}
+          <div className={toastMsg ? 'toast show' : 'toast'}>{toastMsg}</div>
+        </>
+      );
+    }
+
+    // Mount React app
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
