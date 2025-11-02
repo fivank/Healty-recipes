@@ -45,8 +45,36 @@
       box-shadow:var(--shadow);
       margin:0 10px;
     }
-    .search{display:flex;align-items:center;gap:8px;background:#0f141b;border:1px solid var(--border);border-radius:12px;padding:8px 10px;flex:1}
-    .search input{flex:1;background:transparent;border:0;outline:none;color:var(--text);font-size:14px}
+    .search{
+
+      align-items:center;
+      gap:2px;
+      background:#0f141b;
+      border:1px solid var(--border);
+      border-radius:8px;
+      padding:2px 2px;
+      flex:1;
+    }
+    .search input{
+      flex:1;
+      background:transparent;
+      border:0;
+      outline:none;
+      color:var(--text);
+      font-size:13px;
+      line-height:1;
+      padding:2px 0;
+    }
+    .ic.search{
+      width:1px;
+      height:1px;
+      font-size:10px;
+      vertical-align:-1px;  
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      
+    }
 
     /* When stacked vertically, make the button take full width */
     .searchbar .btn{
@@ -143,7 +171,15 @@
     .page header{position:sticky;top:0;background:var(--panel);z-index:1;border-bottom:1px solid var(--border);padding:10px 12px;margin:0;display:flex;align-items:center;justify-content:space-between}
     .page .wrap{padding:12px 10px;max-width:none;margin:0}
     .title{font-weight:800}
-    .back{padding:6px 10px;border-radius:10px;border:1px solid var(--border);background:#0f141b;cursor:pointer}
+    button.back,
+    a.back,
+    [role="button"].back{
+      padding:6px 10px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:#0f141b;
+      cursor:pointer;
+      }    
     .divider{height:1px;background:var(--border);margin:10px 0}
     .flag{font-size:18px;line-height:1}
 
@@ -262,7 +298,7 @@
 
     /* Icons */
     .ic{width:16px;height:16px;display:inline-block;vertical-align:-3px;opacity:.9}
-    .ic.search::before{content:"🔎"} .ic.search{width:12px;height:12px;font-size:12px;vertical-align:-2px}
+    .ic.search::before{content:"🔎"} .ic.search{width:6px;height:12px;font-size:12px;vertical-align:-2px}
     .ic.adv::before{content:"⚙️"} .ic.add::before{content:"➕"} .ic.sel::before{content:"✅"}
     .ic.imp::before{content:"📥"} .ic.exp::before{content:"📤"} .ic.view::before{content:"👁️"}
     .ic.edit::before{content:"✏️"} .ic.del::before{content:"🗑️"} .ic.kcal::before{content:"🔥"}
@@ -793,7 +829,7 @@
           "Delete": "Delete",
           "Saved": "Saved",
           "of": "of",
-          "Advanced Search": "Advanced Search",
+          "Advanced Search": "Advanced Filter",
           "Filters": "Filters",
           "Meal (OR inside)": "Meal (OR inside)",
           "Diet": "Diet",
@@ -915,7 +951,7 @@
           "Delete": "Eliminar",
           "Saved": "Guardado",
           "of": "de",
-          "Advanced Search": "Búsqueda avanzada",
+          "Advanced Search": "Filtro avanzada",
           "Filters": "Filtros",
           "Meal (OR inside)": "Comida (OR dentro)",
           "Diet": "Dieta",
@@ -1037,7 +1073,7 @@
           "Delete": "Löschen",
           "Saved": "Gespeichert",
           "of": "von",
-          "Advanced Search": "Erweiterte Suche",
+          "Advanced Search": "Erweiterte Filter",
           "Filters": "Filter",
           "Meal (OR inside)": "Mahlzeit (ODER innen)",
           "Diet": "Ernährung",
@@ -1573,7 +1609,7 @@
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+               URL.revokeObjectURL(url);
       };
 
       // Reset all recipes
@@ -1917,7 +1953,7 @@
                 placeholder={t('Search recipes…')}
               />
             </div>
-            <button className="btn sm icon" onClick={openAdvanced}><span className="ic adv"></span>{t('Advanced')}</button>
+            <button className="btn sm icon" onClick={openAdvanced}><span className="ic adv"></span>{t('Advanced Filter')}</button>
           </div>
           {/* Actions row */}
           <div className="actions-row" id="topActions">
