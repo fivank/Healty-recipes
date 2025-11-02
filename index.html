@@ -1320,6 +1320,45 @@
         saveRecipes(recipes);
       }, [recipes]);
 
+      // First-run seed: load ./default_recipes.json if there are no saved recipes
+      useEffect(() => {
+        // Only seed if no recipes in localStorage (first run)
+        try {
+          const stored = JSON.parse(localStorage.getItem('recipes') || '[]');
+          if (Array.isArray(stored) && stored.length > 0) return;
+        } catch (_) {
+          // ignore parse errors and proceed with seed
+        }
+
+        (async () => {
+          try {
+            const res = await fetch('./default_recipes.json', { cache: 'no-store' });
+            if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+            const data = await res.json();
+            const items = data?.recipes || (Array.isArray(data) ? data : []);
+            if (!Array.isArray(items) || items.length === 0) return;
+
+            // Normalize and dedupe by id; generate id if missing
+            const map = new Map();
+            items.forEach(r => {
+              const copy = normalizeRecipe({ ...r });
+              if (!copy.id) {
+                const slug = (copy.name || 'recipe')
+                  .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+                copy.id = `${slug}-${Math.random().toString(36).slice(2, 6)}`;
+              }
+              map.set(copy.id, copy);
+            });
+
+            setRecipes(Array.from(map.values())); // will auto-persist via the effect above
+          } catch (err) {
+            console.warn('Default seed load failed:', err);
+          }
+        })();
+        // Run only once on mount
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, []);
+
       // Derived predicate for search.  Use a translation-aware predicate that
       // searches through translated fields via getLangField().  It also
       // depends on the current language to ensure the predicate updates when
