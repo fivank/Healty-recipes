@@ -174,6 +174,9 @@
     button.back,
     a.back,
     [role="button"].back{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       padding:6px 10px;
       color:white;
       border-radius:10px;
@@ -315,7 +318,12 @@
     .ic.imp::before{content:"📥"} .ic.exp::before{content:"📤"} .ic.view::before{content:"👁️"}
     .ic.edit::before{content:"✏️"} .ic.del::before{content:"🗑️"} .ic.kcal::before{content:"🔥"}
     .ic.time::before{content:"⏱️"} .ic.star::before{content:"⭐"} .ic.country::before{content:"🏳️"}
-    .ic.tags::before{content:"🏷️"} .ic.back::before{content:"\2190"; font-size: 22px; vertical-align: -5px; font-weight: bold;} .ic.share::before{content:"🔗"}
+    .ic.tags::before{content:"🏷️"} 
+    .ic.back {
+      background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z'/%3e%3c/svg%3e") center center no-repeat;
+      background-size: contain;
+    }
+    .ic.share::before{content:"🔗"}
     .ic.all::before{content:"🟩"} .ic.link::before{content:"🔗"}
 
     /* Additional section icons for detail headings */
