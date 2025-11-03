@@ -103,7 +103,7 @@ const TRANSLATIONS = {
     "Advanced Search": "Erweiterte Filter","Filters": "Filter","Meal (OR inside)": "Mahlzeit (ODER innen)","Diet": "Ernährung","Course": "Gang",
     "Constraints": "Einschränkungen","Minimum Health Rating": "Mindestgesundheitsbewertung","Maximum Calories (kcal)": "Maximale Kalorien (kcal)",
     "Max Preparation Time (minutes)": "Maximale Zubereitungszeit (Minuten)","Countries": "Länder","Reset": "Zurücksetzen","Apply": "Anwenden",
-    "Back": "Zurück","View Mode": "Ansichtsmodus","Tags": "Tags","Info": "Informationen","Ingredients": "Zutaten","Preparation": "Zubereitung",
+    "Back": "Zurück","View Mode": "Ansicht","Tags": "Tags","Info": "Informationen","Ingredients": "Zutaten","Preparation": "Zubereitung",
     "Optional / Enrichment": "Optional / Anreicherung","Preparation — Advanced": "Zubereitung — Fortgeschritten","Chef Tips": "Chef-Tipps",
     "Dietitian Tips & Macros": "Ernährungsberater-Tipps & Makros","Videos": "Videos","Switch to Advanced": "Zu Erweitert wechseln",
     "Switch to Simple": "Zu Einfach wechseln","View": "Ansicht","Edit": "Bearbeiten","Name": "Name","Country": "Land",
@@ -447,27 +447,6 @@ function App() {
     h('div', { className: 'wrap' },
       h('div', { className: 'grid-adv' },
         h('div', { className: 'block' },
-          h('h4', { onClick: () => toggleAdvCollapse('meal'), style: { cursor: 'pointer' } }, (advCollapse.meal ? '▾' : '▸') + ' ' + t('Meal (OR inside)')),
-          advCollapse.meal && h('div', { className: 'state-list' },
-            MEAL.map(m => h('div', {
-              key: m,
-              className: 'state' + (advanced.meal.has(m) ? ' on' : ''),
-              onClick: () => toggleFilterSet('meal', m)
-              // removed inline color style to unify appearance
-            }, t(m)))
-          ),
-          h('div', { className: 'divider' }),
-          h('h4', { onClick: () => toggleAdvCollapse('diet'), style: { cursor: 'pointer' } }, (advCollapse.diet ? '▾' : '▸') + ' ' + t('Diet')),
-          advCollapse.diet && h('div', { className: 'state-list' },
-            [...new Set(DIET)].map(d => h('div', { key: d, className: 'state' + (advanced.diet.has(d) ? ' on' : ''), onClick: () => toggleFilterSet('diet', d) }, t(d)))
-          ),
-          h('div', { style: { height: '8px' } }),
-          h('h4', { onClick: () => toggleAdvCollapse('course'), style: { cursor: 'pointer' } }, (advCollapse.course ? '▾' : '▸') + ' ' + t('Course')),
-          advCollapse.course && h('div', { className: 'state-list' },
-            COURSE.map(c => h('div', { key: c, className: 'state' + (advanced.course.has(c) ? ' on' : ''), onClick: () => toggleFilterSet('course', c) }, t(c)))
-          )
-        ),
-        h('div', { className: 'block' },
           h('h4', { onClick: () => toggleAdvCollapse('constraints'), style: { cursor: 'pointer' } }, (advCollapse.constraints ? '▾' : '▸') + ' ' + t('Constraints')),
           advCollapse.constraints && h('div', { className: 'range' },
             h('label', null, t('Minimum Health Rating'), ' ', h('span', null, `${advanced.minHealth}/10`)),
@@ -478,6 +457,28 @@ function App() {
             h('label', null, t('Max Preparation Time (minutes)'), ' ', h('span', null, advanced.maxTime != null ? advanced.maxTime : '—')),
             h('input', { type: 'range', min: 0, max: 180, step: 5, value: advanced.maxTime != null ? advanced.maxTime : 0, onChange: e => setAdvanced(p => ({ ...p, maxTime: parseInt(e.target.value, 10) })) }),
             h('input', { type: 'number', min: 0, max: 180, step: 5, value: advanced.maxTime != null ? advanced.maxTime : '', onChange: e => setAdvanced(p => ({ ...p, maxTime: e.target.value.trim() === '' ? null : parseInt(e.target.value, 10) })) })
+          )
+        ),
+        h('div', { className: 'block' },
+          h('h4', { onClick: () => toggleAdvCollapse('meal'), style: { cursor: 'pointer' } }, (advCollapse.meal ? '▾' : '▸') + ' ' + t('Meal (OR inside)')),
+          advCollapse.meal && h('div', { className: 'state-list' },
+            MEAL.map(m => h('div', {
+              key: m,
+              className: 'state' + (advanced.meal.has(m) ? ' on' : ''),
+              onClick: () => toggleFilterSet('meal', m)
+              // removed inline color style to unify appearance
+            }, t(m)))
+          ),
+          h('div', { className: 'divider' }),
+          h('h4', { onClick: () => toggleAdvCollapse('course'), style: { cursor: 'pointer' } }, (advCollapse.course ? '▾' : '▸') + ' ' + t('Course')),
+          advCollapse.course && h('div', { className: 'state-list' },
+            COURSE.map(c => h('div', { key: c, className: 'state' + (advanced.course.has(c) ? ' on' : ''), onClick: () => toggleFilterSet('course', c) }, t(c)))
+          )
+        ),
+        h('div', { className: 'block' },
+          h('h4', { onClick: () => toggleAdvCollapse('diet'), style: { cursor: 'pointer' } }, (advCollapse.diet ? '▾' : '▸') + ' ' + t('Diet')),
+          advCollapse.diet && h('div', { className: 'state-list' },
+            [...new Set(DIET)].map(d => h('div', { key: d, className: 'state' + (advanced.diet.has(d) ? ' on' : ''), onClick: () => toggleFilterSet('diet', d) }, t(d)))
           )
         ),
         h('div', { className: 'block' },
