@@ -82,7 +82,7 @@
     }
 
     .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border);background:var(--card);color:var(--text);
-           padding:8px 12px;border-radius:12px;cursor:pointer;transition:.15s ease;box-shadow:0 2px 0 rgba(0,0,0,.2)}
+           padding:8px 12px;border-radius:12px;cursor:pointer;transition:.15s ease;box-shadow:0 2px 0 rgba(104, 41, 41, 0.2)}
     .btn:hover{transform:translateY(-1px);border-color:#33507a;background:#202a37}
     .btn.primary{background:linear-gradient(180deg,var(--brand) 0,var(--brand-2) 100%);border-color:#1e6d4f}
     .btn.ghost{background:transparent}
@@ -175,6 +175,7 @@
     a.back,
     [role="button"].back{
       padding:6px 10px;
+      color:white;
       border-radius:10px;
       border:1px solid var(--border);
       background:#0f141b;
@@ -314,7 +315,7 @@
     .ic.imp::before{content:"📥"} .ic.exp::before{content:"📤"} .ic.view::before{content:"👁️"}
     .ic.edit::before{content:"✏️"} .ic.del::before{content:"🗑️"} .ic.kcal::before{content:"🔥"}
     .ic.time::before{content:"⏱️"} .ic.star::before{content:"⭐"} .ic.country::before{content:"🏳️"}
-    .ic.tags::before{content:"🏷️"} .ic.back::before{content:"⬅️"} .ic.share::before{content:"🔗"}
+    .ic.tags::before{content:"🏷️"} .ic.back::before{content:"\2190"; font-size: 22px; vertical-align: -5px; font-weight: bold;} .ic.share::before{content:"🔗"}
     .ic.all::before{content:"🟩"} .ic.link::before{content:"🔗"}
 
     /* Additional section icons for detail headings */
