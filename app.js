@@ -304,8 +304,10 @@ function App() {
     if (advanced.maxKcal != null && (r.calories || 0) > advanced.maxKcal) return false;
     if (advanced.maxTime != null && (r.timeMinutes || 9999) > advanced.maxTime) return false;
     if (advanced.meal.size) { const tags = r.tags || []; if (![...advanced.meal].some(tag => tags.includes(tag))) return false; }
-    for (const d of advanced.diet) if (!(r.tags || []).includes(d)) return false;
-    for (const c of advanced.course) if (!(r.tags || []).includes(c)) return false;
+    // OR inside Diet (changed from AND)
+    if (advanced.diet.size) { const tags = r.tags || []; if (![...advanced.diet].some(tag => tags.includes(tag))) return false; }
+    // OR inside Course (changed from AND)
+    if (advanced.course.size) { const tags = r.tags || []; if (![...advanced.course].some(tag => tags.includes(tag))) return false; }
     if (advanced.countries.size && !advanced.countries.has(r.country)) return false;
     return true;
   };
