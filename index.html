@@ -189,32 +189,43 @@
     .block h4{margin:0 0 8px 0;font-size:13px;color:#bcd3ee;text-transform:uppercase;letter-spacing:.3px}
     .state-list,.flag-list{display:flex;flex-wrap:wrap;gap:8px}
     .state{
-      border:1px solid rgba(55,176,123,0.4);
-      background:rgba(55,176,123,0.15);
-      color:#d8e7f6;
+      /* neutral base (same for all tags) */
+      background:#0a0f14;
+      border:1px solid var(--border);
+      color:var(--text);
       padding:8px 10px;
       border-radius:999px;
       font-size:13px;
       cursor:pointer;
       user-select:none;
+      transition:background-color .2s, border-color .2s, box-shadow .2s, color .2s;
     }
     .state.on{
-      background:rgba(55,176,123,0.25);
-      border-color:rgba(55,176,123,0.6);
+      /* much more visible accent when selected */
+      background:linear-gradient(180deg, var(--brand) 0%, var(--brand-2) 100%);
+      border-color:var(--brand-2);
+      color:var(--bg);
+      box-shadow:0 0 0 2px rgba(55,176,123,.4), 0 8px 20px rgba(55,176,123,.25);
     }
     .flag-item{
       display:flex;
       align-items:center;
       gap:8px;
-      background:rgba(55,176,123,0.15);
-      border:1px solid rgba(55,176,123,0.4);
+      /* same neutral base as .state */
+      background:#0a0f14;
+      border:1px solid var(--border);
       padding:8px 10px;
       border-radius:999px;
       cursor:pointer;
+      transition:background-color .2s, border-color .2s, box-shadow .2s, color .2s;
+      color:var(--text);
     }
     .flag-item.on{
-      background:rgba(55,176,123,0.25);
-      border-color:rgba(55,176,123,0.6);
+      /* same strong selected accent as .state.on */
+      background:linear-gradient(180deg, var(--brand) 0%, var(--brand-2) 100%);
+      border-color:var(--brand-2);
+      color:var(--bg);
+      box-shadow:0 0 0 2px rgba(55,176,123,.4), 0 8px 20px rgba(55,176,123,.25);
     }
     .range{display:grid;gap:10px}
     .range label{font-size:13px;color:var(--muted);display:flex;justify-content:space-between}

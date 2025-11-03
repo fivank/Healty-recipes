@@ -448,8 +448,10 @@ function App() {
           h('h4', { onClick: () => toggleAdvCollapse('meal'), style: { cursor: 'pointer' } }, (advCollapse.meal ? '▾' : '▸') + ' ' + t('Meal (OR inside)')),
           advCollapse.meal && h('div', { className: 'state-list' },
             MEAL.map(m => h('div', {
-              key: m, className: 'state' + (advanced.meal.has(m) ? ' on' : ''), onClick: () => toggleFilterSet('meal', m),
-              style: { background: MEAL_COLORS[m], borderColor: MEAL_COLORS[m] }
+              key: m,
+              className: 'state' + (advanced.meal.has(m) ? ' on' : ''),
+              onClick: () => toggleFilterSet('meal', m)
+              // removed inline color style to unify appearance
             }, t(m)))
           ),
           h('div', { className: 'divider' }),
