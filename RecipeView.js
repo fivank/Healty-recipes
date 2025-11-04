@@ -1,6 +1,6 @@
 // RecipeView: detailed recipe page with simple/advanced mode and video thumbnail.
 
-export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangField, extractVideoId, DEFAULT_THUMB, onFavorite }) {
+export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangField, extractVideoId, DEFAULT_THUMB, onToggleFavorite }) {
   const { useState, Fragment } = React;
   const h = React.createElement;
 
@@ -12,6 +12,7 @@ export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangFi
   // ADD: also use base tags and combine for display
   const baseTags = Array.isArray(r.tags) ? r.tags : [];
   const combinedTags = Array.from(new Set([...(baseTags || []), ...((tagsVal || []))]));
+  const isFav = baseTags.some(t => (t ?? '').toLowerCase() === 'favorite');
 
   const { value: ingredientsVal } = getLangField(r, 'ingredients');
   const { value: optionalVal } = getLangField(r, 'optionalIngredients');
@@ -39,9 +40,9 @@ export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangFi
       h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center' } },
         h('div', { className: 'flag' }, FLAG[r.country] || '🏳️'),
         h('button', { className: 'btn sm icon', onClick: onShare }, h('span', { className: 'ic share' }), t('Share')),
-        h('button', { className: 'btn sm icon', onClick: () => onEdit(r) }, h('span', { className: 'ic edit' }), t('Edit')),
-        // ADD: Add to Favorite button (uses emoji, no CSS icon needed)
-        onFavorite && h('button', { className: 'btn sm', onClick: () => onFavorite(r.id) }, '❤️ ', t('Add to Favorite'))
+  h('button', { className: 'btn sm icon', onClick: () => onEdit(r) }, h('span', { className: 'ic edit' }), t('Edit')),
+  // ADD: Favorite toggle button (uses emoji, no CSS icon needed)
+  onToggleFavorite && h('button', { className: 'btn sm', onClick: () => onToggleFavorite(r.id) }, '❤️ ', isFav ? t('Remove from Favorites') : t('Add to Favorite'))
       )
     ),
     h('div', { className: 'thumb-full' },

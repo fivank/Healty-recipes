@@ -114,6 +114,7 @@ export function RecipeList(props) {
       const { value: nameVal, warning: nameWarn } = getLangField(r, 'name');
       const { value: tagsVal } = getLangField(r, 'tags') || { value: [] };
       const originalTags = r.tags || [];
+      const isFav = Array.isArray(originalTags) && originalTags.some(t => (t ?? '').toLowerCase() === 'favorite');
       const mealTranslated = [];
       const otherTranslated = [];
       for (let i = 0; i < (tagsVal || []).length; i++) {
@@ -155,6 +156,7 @@ export function RecipeList(props) {
         h('span', { className: 'pill' }, h('span', { className: 'ic country' }), (FLAG[r.country] || '🏳️'), ' ', r.country || '')
       ),
       h('div', { className: 'tags' },
+        isFav && h('span', { className: 'tag' }, '❤️ ', t('Favorite')),
         mealTranslated.map((tg, i) => h('span', { key: 'mt-' + i, className: 'tag' }, tg)),
         otherTranslated.slice(0, 3).map((tg, i) => h('span', { key: 'ot-' + i, className: 'tag' }, tg)),
         r.videoLinks && r.videoLinks.length > 0 ? h('span', { className: 'tag tag-video', title: t('Video available') }, t('Video')) : null

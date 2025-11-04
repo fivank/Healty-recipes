@@ -429,21 +429,23 @@ function App() {
   };
   const deleteRecipe = id => { if (!window.confirm('Delete this recipe?')) return; setRecipes(recipes.filter(r => r.id !== id)); };
 
-  // Favorites: toggle filter and add favorite tag
+  // Favorites: toggle filter and toggle favorite tag on a recipe
   const toggleFavoritesOnly = () => setFavoritesOnly(v => !v);
-  const addFavorite = (id) => {
+  const toggleFavorite = (id) => {
     setRecipes(prev => prev.map(r => {
       if (r.id !== id) return r;
       const base = Array.isArray(r.tags) ? r.tags : [];
-      if (base.some(tg => (tg ?? '').toLowerCase() === 'favorite')) return r; // already favorite
-      return { ...r, tags: [...base, 'favorite'] };
+      const has = base.some(tg => (tg ?? '').toLowerCase() === 'favorite');
+      const nextTags = has ? base.filter(tg => (tg ?? '').toLowerCase() !== 'favorite') : [...base, 'favorite'];
+      return { ...r, tags: nextTags };
     }));
     // Keep detail view in sync if open
     setDetailRecipe(prev => {
       if (!prev || prev.id !== id) return prev;
       const base = Array.isArray(prev.tags) ? prev.tags : [];
-      if (base.some(tg => (tg ?? '').toLowerCase() === 'favorite')) return prev;
-      return { ...prev, tags: [...base, 'favorite'] };
+      const has = base.some(tg => (tg ?? '').toLowerCase() === 'favorite');
+      const nextTags = has ? base.filter(tg => (tg ?? '').toLowerCase() !== 'favorite') : [...base, 'favorite'];
+      return { ...prev, tags: nextTags };
     });
   };
 
@@ -631,7 +633,7 @@ function App() {
       recipe: detailRecipe, onBack: closeDetail, onEdit: openEditor, onShare: shareCurrentRecipe,
       t, FLAG, getLangField, extractVideoId, DEFAULT_THUMB,
       // ADD:
-      onFavorite: addFavorite
+      onToggleFavorite: toggleFavorite
     }),
     currentPage === 'editor' && editingRecipe && h(RecipeEditor, {
       recipe: editingRecipe, isCreate, onCancel: closeEditor, onSave: saveEditedRecipe,
