@@ -1,6 +1,6 @@
 // RecipeView: detailed recipe page with simple/advanced mode and video thumbnail.
 
-export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangField, extractVideoId, DEFAULT_THUMB }) {
+export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangField, extractVideoId, DEFAULT_THUMB, onFavorite }) {
   const { useState, Fragment } = React;
   const h = React.createElement;
 
@@ -9,6 +9,10 @@ export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangFi
 
   const { value: nameVal, warning: nameWarn } = getLangField(r, 'name');
   const { value: tagsVal } = getLangField(r, 'tags');
+  // ADD: also use base tags and combine for display
+  const baseTags = Array.isArray(r.tags) ? r.tags : [];
+  const combinedTags = Array.from(new Set([...(baseTags || []), ...((tagsVal || []))]));
+
   const { value: ingredientsVal } = getLangField(r, 'ingredients');
   const { value: optionalVal } = getLangField(r, 'optionalIngredients');
   const { value: prepSimpleVal } = getLangField(r, 'preparationSimple');
@@ -35,7 +39,9 @@ export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangFi
       h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center' } },
         h('div', { className: 'flag' }, FLAG[r.country] || '🏳️'),
         h('button', { className: 'btn sm icon', onClick: onShare }, h('span', { className: 'ic share' }), t('Share')),
-        h('button', { className: 'btn sm icon', onClick: () => onEdit(r) }, h('span', { className: 'ic edit' }), t('Edit'))
+        h('button', { className: 'btn sm icon', onClick: () => onEdit(r) }, h('span', { className: 'ic edit' }), t('Edit')),
+        // ADD: Add to Favorite button (uses emoji, no CSS icon needed)
+        onFavorite && h('button', { className: 'btn sm', onClick: () => onFavorite(r.id) }, '❤️ ', t('Add to Favorite'))
       )
     ),
     h('div', { className: 'thumb-full' },
@@ -55,8 +61,16 @@ export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangFi
       h('div', { className: 'row' },
         h('h5', null, h('span', { className: 'ic tags' }), ' ', t('Tags')),
         h('div', { className: 'block2', id: 'dTags' },
-          (tagsVal || []).map((tg, i) => h('span', { key: i, className: 'tag', style: { marginRight: '6px' } }, tg)),
-          (videosVal && videosVal.length > 0) ? h('span', { className: 'tag tag-video', title: t('Video available') }, t('Video')) : null
+          // CHANGED: render combined tags and show a heart for the favorite tag
+          (combinedTags || []).map((tg, i) => {
+            const s = (tg ?? '').toString();
+            const isFav = s.toLowerCase() === 'favorite';
+            const label = isFav ? `❤️ ${t('Favorite')}` : s;
+            return h('span', { key: i, className: 'tag', style: { marginRight: '6px' } }, label);
+          }),
+          (videosVal && videosVal.length > 0)
+            ? h('span', { className: 'tag tag-video', title: t('Video available') }, t('Video'))
+            : null
         )
       ),
       h('div', { className: 'row' },

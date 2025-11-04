@@ -245,6 +245,8 @@ function App() {
   const [toastMsg, setToastMsg] = useState(null);
   const [lang, setLang] = useState('en');
   const [advCollapse, setAdvCollapse] = useState({ meal: false, diet: false, course: false, constraints: false, countries: false });
+  // ADD: favorites-only UI state
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
 
   useEffect(() => saveRecipes(recipes), [recipes]);
 
@@ -296,6 +298,14 @@ function App() {
     if (['tags','ingredients','optionalIngredients','videoLinks'].includes(field)) return { value: [], warning: false };
     return { value: '', warning: false };
   };
+  // ADD: favorite helper (checks both base tags and i18n tags)
+  const isFavorite = (r) => {
+    const base = Array.isArray(r.tags) ? r.tags : [];
+    const { value: locTags } = getLangField(r, 'tags') || { value: [] };
+    const all = [...base, ...(Array.isArray(locTags) ? locTags : [])]
+      .map(x => (x ?? '').toString().toLowerCase());
+    return all.includes('favorite');
+  };
 
   const searchPredicate = useMemo(() => buildLangSearchPredicate(searchQuery, getLangField), [searchQuery, lang]);
 
@@ -312,7 +322,18 @@ function App() {
     return true;
   };
 
-  const visibleRecipes = useMemo(() => recipes.filter(r => searchPredicate(r) && matchesAdvanced(r)), [recipes, searchPredicate, advanced]);
+  // existing memo of visible recipes — extend with favoritesOnly
+  // BEFORE:
+  // const visibleRecipes = useMemo(() => recipes.filter(r => searchPredicate(r) && matchesAdvanced(r)), [recipes, searchPredicate, advanced]);
+  // AFTER:
+  const visibleRecipes = useMemo(
+    () => recipes.filter(r =>
+      searchPredicate(r) &&
+      matchesAdvanced(r) &&
+      (!favoritesOnly || isFavorite(r))
+    ),
+    [recipes, searchPredicate, advanced, favoritesOnly]
+  );
 
   useEffect(() => {
     setSelectedIds(prev => {
@@ -341,6 +362,13 @@ function App() {
   if (advanced.minHealth && advanced.minHealth > 1) activeFilterChips.push({ label: `Health ≥ ${advanced.minHealth}`, onRemove: () => setAdvanced(p => ({ ...p, minHealth: 1 })) });
   if (advanced.maxKcal != null) activeFilterChips.push({ label: `Kcal ≤ ${advanced.maxKcal}`, onRemove: () => setAdvanced(p => ({ ...p, maxKcal: null })) });
   if (advanced.maxTime != null) activeFilterChips.push({ label: `Time ≤ ${advanced.maxTime}m`, onRemove: () => setAdvanced(p => ({ ...p, maxTime: null })) });
+  // OPTIONAL: show a chip when favoritesOnly is on, removable
+  if (favoritesOnly) {
+    activeFilterChips.push({
+      label: '❤️ Favorite',
+      onRemove: () => setFavoritesOnly(false)
+    });
+  }
 
   // Navigation and handlers
   const openDetail = r => { setDetailRecipe(r); setCurrentPage('detail'); };
@@ -400,6 +428,24 @@ function App() {
     setRecipes(recipes.filter(r => !selectedIds.has(r.id))); setSelectedIds(new Set()); setSelecting(false);
   };
   const deleteRecipe = id => { if (!window.confirm('Delete this recipe?')) return; setRecipes(recipes.filter(r => r.id !== id)); };
+
+  // Favorites: toggle filter and add favorite tag
+  const toggleFavoritesOnly = () => setFavoritesOnly(v => !v);
+  const addFavorite = (id) => {
+    setRecipes(prev => prev.map(r => {
+      if (r.id !== id) return r;
+      const base = Array.isArray(r.tags) ? r.tags : [];
+      if (base.some(tg => (tg ?? '').toLowerCase() === 'favorite')) return r; // already favorite
+      return { ...r, tags: [...base, 'favorite'] };
+    }));
+    // Keep detail view in sync if open
+    setDetailRecipe(prev => {
+      if (!prev || prev.id !== id) return prev;
+      const base = Array.isArray(prev.tags) ? prev.tags : [];
+      if (base.some(tg => (tg ?? '').toLowerCase() === 'favorite')) return prev;
+      return { ...prev, tags: [...base, 'favorite'] };
+    });
+  };
 
   // Share
   const openShare = () => { const items = recipes.filter(r => selectedIds.has(r.id)); setShareRecipes(items); setCurrentPage('share'); };
@@ -575,12 +621,17 @@ function App() {
       enterSelection, exitSelection, selectAllVisible, openShare, bulkDelete,
       FLAG, t, menuOpen, setMenuOpen, setLang, FLAG_EMOJI, deleteRecipe, openDetail, toggleSelected,
       DEFAULT_THUMB, getLangField, extractVideoId, activeFilterChips, onImport: handleImport, onExport: handleExport,
-      openEditor, resetRecipes
+      openEditor, resetRecipes,
+      // ADD:
+      favoritesOnly,
+      toggleFavorites: toggleFavoritesOnly
     }),
     currentPage === 'advanced' && AdvancedPage,
     currentPage === 'detail' && detailRecipe && h(RecipeView, {
       recipe: detailRecipe, onBack: closeDetail, onEdit: openEditor, onShare: shareCurrentRecipe,
-      t, FLAG, getLangField, extractVideoId, DEFAULT_THUMB
+      t, FLAG, getLangField, extractVideoId, DEFAULT_THUMB,
+      // ADD:
+      onFavorite: addFavorite
     }),
     currentPage === 'editor' && editingRecipe && h(RecipeEditor, {
       recipe: editingRecipe, isCreate, onCancel: closeEditor, onSave: saveEditedRecipe,

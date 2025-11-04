@@ -7,7 +7,9 @@ export function RecipeList(props) {
     selectAllVisible, openShare, bulkDelete, FLAG, t, menuOpen, setMenuOpen,
     setLang, FLAG_EMOJI, deleteRecipe, openDetail, toggleSelected,
     DEFAULT_THUMB, getLangField, extractVideoId, activeFilterChips,
-    onImport, onExport, openEditor, resetRecipes
+    onImport, onExport, openEditor, resetRecipes,
+    // ADD:
+    favoritesOnly, toggleFavorites
   } = props;
 
   const h = React.createElement;
@@ -84,6 +86,8 @@ export function RecipeList(props) {
     h('button', { className: 'btn sm icon hidden', id: 'btnAdd' }, h('span', { className: 'ic add' }), 'Add'),
     h('button', { className: 'btn sm icon', onClick: () => (selecting ? exitSelection() : enterSelection()) },
       h('span', { className: 'ic sel' }), selecting ? t('Cancel Select') : t('Select')),
+    // ADD: Show favorites toggle
+    h('button', { className: 'btn sm icon', onClick: toggleFavorites }, '❤️ ', favoritesOnly ? t('Show all') : t('Show favorites')),
     h('button', { className: 'btn sm icon hidden', id: 'btnImport' }, h('span', { className: 'ic imp' }), 'Import'),
     h('button', { className: 'btn sm icon hidden', id: 'btnExport' }, h('span', { className: 'ic exp' }), 'Export'),
     selecting && h(Fragment, null,
