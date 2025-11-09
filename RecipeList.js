@@ -9,7 +9,7 @@ export function RecipeList(props) {
     DEFAULT_THUMB, getLangField, extractVideoId, activeFilterChips,
     onImport, onExport, openEditor, resetRecipes,
     // ADD:
-    favoritesOnly, toggleFavorites
+    favoritesOnly, toggleFavorites, favoriteIds
   } = props;
 
   const h = React.createElement;
@@ -114,12 +114,15 @@ export function RecipeList(props) {
       const { value: nameVal, warning: nameWarn } = getLangField(r, 'name');
       const { value: tagsVal } = getLangField(r, 'tags') || { value: [] };
       const originalTags = r.tags || [];
-      const isFav = Array.isArray(originalTags) && originalTags.some(t => (t ?? '').toLowerCase() === 'favorite');
+      const fromSet = favoriteIds && typeof favoriteIds.has === 'function' ? favoriteIds.has(r.id) : false;
+      const fromTags = Array.isArray(originalTags) && originalTags.some(t => (t ?? '').toLowerCase() === 'favorite');
+      const isFav = fromSet || fromTags;
       const mealTranslated = [];
       const otherTranslated = [];
       for (let i = 0; i < (tagsVal || []).length; i++) {
         const orig = originalTags[i];
         const translated = tagsVal[i];
+        if ((orig ?? '').toLowerCase() === 'favorite') continue;
         if (orig && ['Breakfast', 'Lunch', 'Dinner', 'Snack'].includes(orig)) mealTranslated.push(translated);
         else otherTranslated.push(translated);
       }

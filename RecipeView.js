@@ -1,6 +1,6 @@
 // RecipeView: detailed recipe page with simple/advanced mode and video thumbnail.
 
-export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangField, extractVideoId, DEFAULT_THUMB, onToggleFavorite }) {
+export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangField, extractVideoId, DEFAULT_THUMB, onToggleFavorite, favoriteIds }) {
   const { useState, Fragment } = React;
   const h = React.createElement;
 
@@ -9,10 +9,12 @@ export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangFi
 
   const { value: nameVal, warning: nameWarn } = getLangField(r, 'name');
   const { value: tagsVal } = getLangField(r, 'tags');
-  // ADD: also use base tags and combine for display
   const baseTags = Array.isArray(r.tags) ? r.tags : [];
+  const fromSet = favoriteIds && typeof favoriteIds.has === 'function' ? favoriteIds.has(r.id) : false;
+  const fromTags = baseTags.some(t => (t ?? '').toLowerCase() === 'favorite');
+  const isFav = fromSet || fromTags;
   const combinedTags = Array.from(new Set([...(baseTags || []), ...((tagsVal || []))]));
-  const isFav = baseTags.some(t => (t ?? '').toLowerCase() === 'favorite');
+  const nonFavoriteTags = combinedTags.filter(tag => (tag ?? '').toString().toLowerCase() !== 'favorite');
 
   const { value: ingredientsVal } = getLangField(r, 'ingredients');
   const { value: optionalVal } = getLangField(r, 'optionalIngredients');
@@ -62,13 +64,8 @@ export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangFi
       h('div', { className: 'row' },
         h('h5', null, h('span', { className: 'ic tags' }), ' ', t('Tags')),
         h('div', { className: 'block2', id: 'dTags' },
-          // CHANGED: render combined tags and show a heart for the favorite tag
-          (combinedTags || []).map((tg, i) => {
-            const s = (tg ?? '').toString();
-            const isFav = s.toLowerCase() === 'favorite';
-            const label = isFav ? `❤️ ${t('Favorite')}` : s;
-            return h('span', { key: i, className: 'tag', style: { marginRight: '6px' } }, label);
-          }),
+          isFav && h('span', { className: 'tag', style: { marginRight: '6px' } }, '❤️ ', t('Favorite')),
+          (nonFavoriteTags || []).map((tg, i) => h('span', { key: i, className: 'tag', style: { marginRight: '6px' } }, tg)),
           (videosVal && videosVal.length > 0)
             ? h('span', { className: 'tag tag-video', title: t('Video available') }, t('Video'))
             : null

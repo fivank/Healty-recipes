@@ -3,9 +3,9 @@
 import { RecipeList } from './RecipeList.js';
 import { RecipeView } from './RecipeView.js';
 import { RecipeEditor } from './RecipeEditor.js';
-import { importRecipesFromFile, exportRecipesToFile } from './ImportExport.js';
+import { importAppStateFromFile, exportAppStateToFile } from './ImportExport.js';
 
-const { useState, useEffect, useMemo, Fragment } = React;
+const { useState, useEffect, useMemo, useCallback, Fragment } = React;
 const h = React.createElement;
 
 // Flags, tags, and constants
@@ -64,7 +64,9 @@ const TRANSLATIONS = {
     "Pork": "Pork","Chicken": "Chicken","Turkey": "Turkey","Lamb": "Lamb","Legume": "Legume","Keto": "Keto","Power-Food": "Power-Food",
     "Raw": "Raw","Comfort Food": "Comfort Food","Low Glycemic Index": "Low Glycemic Index","Anti-inflammatory": "Anti-inflammatory",
     "Barbeque": "Barbeque","Paleo": "Paleo","Soup": "Soup","Side": "Side","Starter": "Starter","Dessert": "Dessert","Juice": "Juice",
-    "Cream-Soup": "Cream-Soup","Smoothy": "Smoothy"
+    "Cream-Soup": "Cream-Soup","Smoothy": "Smoothy",
+    "Favorite": "Favorite","Add to Favorite": "Add to Favorite","Remove from Favorites": "Remove from Favorites",
+    "Show favorites": "Show favorites","Show all": "Show all"
   },
   es: {
     "Add": "Añadir","Import": "Importar","Export": "Exportar","Reset (forget recipes)": "Restablecer (olvidar recetas)",
@@ -94,7 +96,9 @@ const TRANSLATIONS = {
     "High Fiber": "Alto en fibra","Beef": "Res","Pork": "Cerdo","Chicken": "Pollo","Turkey": "Pavo","Lamb": "Cordero","Legume": "Legumbres",
     "Keto": "Keto","Power-Food": "Superalimento","Raw": "Crudo","Comfort Food": "Comida reconfortante","Low Glycemic Index": "Bajo índice glucémico",
     "Anti-inflammatory": "Antiinflamatorio","Barbeque": "Barbacoa","Paleo": "Paleo","Soup": "Sopa","Side": "Acompañamiento","Starter": "Entrante",
-    "Dessert": "Postre","Juice": "Jugo","Cream-Soup": "Crema","Smoothy": "Batido"
+    "Dessert": "Postre","Juice": "Jugo","Cream-Soup": "Crema","Smoothy": "Batido",
+    "Favorite": "Favorito","Add to Favorite": "Añadir a favorito","Remove from Favorites": "Quitar de favoritos",
+    "Show favorites": "Ver favoritos","Show all": "Ver todos"
   },
   de: {
     "Add": "Hinzufügen","Import": "Importieren","Export": "Exportieren","Reset (forget recipes)": "Zurücksetzen (Rezepte vergessen)",
@@ -127,7 +131,9 @@ const TRANSLATIONS = {
     "High Fiber": "Ballaststoffreich","Beef": "Rind","Pork": "Schwein","Chicken": "Hähnchen","Turkey": "Pute","Lamb": "Lamm","Legume": "Hülsenfrüchte",
     "Keto": "Keto","Power-Food": "Power-Food","Raw": "Roh","Comfort Food": "Hausmannskost","Low Glycemic Index": "Niedriger glykämischer Index",
     "Anti-inflammatory": "Entzündungshemmend","Barbeque": "Barbecue","Paleo": "Paleo","Soup": "Suppe","Side": "Beilage","Starter": "Vorspeise",
-    "Dessert": "Dessert","Juice": "Saft","Cream-Soup": "Cremesuppe","Smoothy": "Smoothie"
+    "Dessert": "Dessert","Juice": "Saft","Cream-Soup": "Cremesuppe","Smoothy": "Smoothie",
+    "Favorite": "Favorit","Add to Favorite": "Zu Favoriten hinzufügen","Remove from Favorites": "Aus Favoriten entfernen",
+    "Show favorites": "Favoriten anzeigen","Show all": "Alle anzeigen"
   },
   fr: {
     "Add": "Ajouter","Import": "Importer","Export": "Exporter","Reset (forget recipes)": "Réinitialiser (oublier les recettes)",
@@ -159,16 +165,108 @@ const TRANSLATIONS = {
     "High Protein": "Riche en protéines","High Fiber": "Riche en fibres","Beef": "Bœuf","Pork": "Porc","Chicken": "Poulet","Turkey": "Dinde",
     "Lamb": "Agneau","Legume": "Légumineuse","Keto": "Keto","Power-Food": "Super-aliment","Raw": "Cru","Comfort Food": "Plat réconfortant",
     "Low Glycemic Index": "Index glycémique bas","Anti-inflammatory": "Anti-inflammatoire","Barbeque": "Barbecue","Paleo": "Paléo",
-    "Soup": "Soupe","Side": "Accompagnement","Starter": "Entrée","Dessert": "Dessert","Juice": "Jus","Cream-Soup": "Velouté","Smoothy": "Smoothie"
+    "Soup": "Soupe","Side": "Accompagnement","Starter": "Entrée","Dessert": "Dessert","Juice": "Jus","Cream-Soup": "Velouté","Smoothy": "Smoothie",
+    "Favorite": "Favori","Add to Favorite": "Ajouter aux favoris","Remove from Favorites": "Retirer des favoris",
+    "Show favorites": "Afficher favoris","Show all": "Afficher tout"
   }
 };
 
 // Utils
-function loadRecipes() {
-  try { const raw = localStorage.getItem('recipes'); if (!raw) return []; const parsed = JSON.parse(raw); return Array.isArray(parsed) ? parsed : []; }
-  catch { return []; }
+const STORAGE_KEY = 'healthyRecipeAppState';
+const APP_STATE_VERSION = 2;
+
+function defaultAdvanced() {
+  return { meal: [], diet: [], course: [], countries: [], minHealth: 1, maxKcal: null, maxTime: null };
 }
-function saveRecipes(rs) { try { localStorage.setItem('recipes', JSON.stringify(rs)); } catch {} }
+function defaultAdvCollapse() {
+  return { meal: false, diet: false, course: false, constraints: false, countries: false };
+}
+function buildDefaultAppState(overrides = {}) {
+  return {
+    version: APP_STATE_VERSION,
+    recipes: [],
+    searchQuery: '',
+    advanced: defaultAdvanced(),
+    favorites: [],
+    favoritesOnly: false,
+    lang: 'en',
+    currentPage: 'list',
+    detailRecipeId: null,
+    editor: null,
+    advCollapse: defaultAdvCollapse(),
+    selecting: false,
+    selectedIds: [],
+    ...overrides
+  };
+}
+function sanitizeArray(value) {
+  return Array.isArray(value) ? [...value] : [];
+}
+function migrateAppState(raw) {
+  const base = buildDefaultAppState();
+  if (!raw || typeof raw !== 'object') return base;
+
+  const advancedRaw = raw.advanced && typeof raw.advanced === 'object' ? raw.advanced : {};
+  const advCollapseRaw = raw.advCollapse && typeof raw.advCollapse === 'object' ? raw.advCollapse : {};
+  const editorRaw = raw.editor && typeof raw.editor === 'object' ? raw.editor : null;
+
+  const migrated = {
+    ...base,
+    ...raw,
+    version: APP_STATE_VERSION,
+    advanced: {
+      ...defaultAdvanced(),
+      ...advancedRaw
+    },
+    advCollapse: {
+      ...defaultAdvCollapse(),
+      ...advCollapseRaw
+    },
+    favorites: sanitizeArray(raw.favorites),
+    selectedIds: sanitizeArray(raw.selectedIds)
+  };
+
+  migrated.advanced.meal = sanitizeArray(migrated.advanced.meal);
+  migrated.advanced.diet = sanitizeArray(migrated.advanced.diet);
+  migrated.advanced.course = sanitizeArray(migrated.advanced.course);
+  migrated.advanced.countries = sanitizeArray(migrated.advanced.countries);
+  migrated.advanced.minHealth = typeof migrated.advanced.minHealth === 'number' ? migrated.advanced.minHealth : 1;
+  migrated.advanced.maxKcal = migrated.advanced.maxKcal != null ? migrated.advanced.maxKcal : null;
+  migrated.advanced.maxTime = migrated.advanced.maxTime != null ? migrated.advanced.maxTime : null;
+
+  migrated.editor = editorRaw && editorRaw.draft && typeof editorRaw.draft === 'object'
+    ? { isCreate: !!editorRaw.isCreate, draft: editorRaw.draft }
+    : null;
+
+  if (!LANGS.includes(migrated.lang)) migrated.lang = 'en';
+  migrated.favoritesOnly = !!migrated.favoritesOnly;
+  migrated.selecting = !!migrated.selecting;
+
+  return migrated;
+}
+function loadAppState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return migrateAppState(JSON.parse(raw));
+  } catch (err) {
+    console.warn('Failed to load stored state', err);
+  }
+  try {
+    const legacy = JSON.parse(localStorage.getItem('recipes') || '[]');
+    if (Array.isArray(legacy)) return migrateAppState({ recipes: legacy });
+  } catch (err) {
+    console.warn('Failed to load legacy recipes', err);
+  }
+  return buildDefaultAppState();
+}
+function saveAppState(state) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    localStorage.removeItem('recipes');
+  } catch (err) {
+    console.warn('Failed to persist state', err);
+  }
+}
 function normalizeRecipe(r) {
   if (!r) return r;
   const translatable = ['name','tags','ingredients','optionalIngredients','preparationSimple','preparationAdvanced','chefTips','dietitianTips','videoLinks'];
@@ -231,31 +329,71 @@ function extractVideoId(url) {
 }
 
 function App() {
-  const [recipes, setRecipes] = useState(() => (loadRecipes() || []).map(normalizeRecipe));
-  const [searchQuery, setSearchQuery] = useState('');
-  const [advanced, setAdvanced] = useState({ meal: new Set(), diet: new Set(), course: new Set(), countries: new Set(), minHealth: 1, maxKcal: null, maxTime: null });
-  const [selecting, setSelecting] = useState(false);
-  const [selectedIds, setSelectedIds] = useState(new Set());
-  const [currentPage, setCurrentPage] = useState('list');
-  const [detailRecipe, setDetailRecipe] = useState(null);
-  const [editingRecipe, setEditingRecipe] = useState(null);
-  const [isCreate, setIsCreate] = useState(false);
+  const initialState = useMemo(() => loadAppState(), []);
+  const normalizedSeed = useMemo(
+    () => (initialState.recipes || []).map(normalizeRecipe),
+    [initialState]
+  );
+  const initialIdSet = useMemo(
+    () => new Set(normalizedSeed.map(r => r.id).filter(Boolean)),
+    [normalizedSeed]
+  );
+  const initialDetailRecipe = useMemo(
+    () => (initialState.detailRecipeId ? normalizedSeed.find(r => r.id === initialState.detailRecipeId) || null : null),
+    [normalizedSeed, initialState]
+  );
+  const initialEditorDraft = useMemo(() => {
+    const editor = initialState.editor;
+    if (editor && editor.draft && typeof editor.draft === 'object') {
+      return JSON.parse(JSON.stringify(editor.draft));
+    }
+    return null;
+  }, [initialState]);
+  const initialPage = useMemo(() => {
+    let page = initialState.currentPage;
+    if (page === 'detail' && !initialDetailRecipe) page = 'list';
+    if (page === 'editor' && !initialEditorDraft) page = 'list';
+    if (page === 'share') page = 'list';
+    if (!['list', 'detail', 'advanced', 'editor'].includes(page)) page = 'list';
+    return page;
+  }, [initialState, initialDetailRecipe, initialEditorDraft]);
+
+  const [recipes, setRecipes] = useState(normalizedSeed);
+  const [searchQuery, setSearchQuery] = useState(initialState.searchQuery || '');
+  const [advanced, setAdvanced] = useState(() => ({
+    meal: new Set(sanitizeArray(initialState.advanced?.meal)),
+    diet: new Set(sanitizeArray(initialState.advanced?.diet)),
+    course: new Set(sanitizeArray(initialState.advanced?.course)),
+    countries: new Set(sanitizeArray(initialState.advanced?.countries)),
+    minHealth: initialState.advanced?.minHealth ?? 1,
+    maxKcal: initialState.advanced?.maxKcal ?? null,
+    maxTime: initialState.advanced?.maxTime ?? null
+  }));
+  const [selecting, setSelecting] = useState(() => !!initialState.selecting && sanitizeArray(initialState.selectedIds).length > 0);
+  const [selectedIds, setSelectedIds] = useState(() => new Set(sanitizeArray(initialState.selectedIds).filter(id => initialIdSet.has(id))));
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [detailRecipe, setDetailRecipe] = useState(() => (initialPage === 'detail' ? initialDetailRecipe : null));
+  const [editingRecipe, setEditingRecipe] = useState(() => (initialPage === 'editor' ? initialEditorDraft : null));
+  const [isCreate, setIsCreate] = useState(() => (initialPage === 'editor' && initialState.editor ? !!initialState.editor.isCreate : false));
   const [menuOpen, setMenuOpen] = useState(false);
   const [shareRecipes, setShareRecipes] = useState([]);
   const [toastMsg, setToastMsg] = useState(null);
-  const [lang, setLang] = useState('en');
-  const [advCollapse, setAdvCollapse] = useState({ meal: false, diet: false, course: false, constraints: false, countries: false });
-  // ADD: favorites-only UI state
-  const [favoritesOnly, setFavoritesOnly] = useState(false);
-
-  useEffect(() => saveRecipes(recipes), [recipes]);
+  const [lang, setLang] = useState(() => (LANGS.includes(initialState.lang) ? initialState.lang : 'en'));
+  const [advCollapse, setAdvCollapse] = useState(() => ({ ...defaultAdvCollapse(), ...(initialState.advCollapse || {}) }));
+  const [favoritesOnly, setFavoritesOnly] = useState(!!initialState.favoritesOnly);
+  const [favoriteIds, setFavoriteIds] = useState(() => {
+    const pref = new Set(sanitizeArray(initialState.favorites).filter(id => initialIdSet.has(id)));
+    if (pref.size === 0) {
+      normalizedSeed.forEach(r => {
+        if (Array.isArray(r.tags) && r.tags.some(t => (t ?? '').toLowerCase() === 'favorite')) pref.add(r.id);
+      });
+    }
+    return pref;
+  });
 
   // Seed (note: some preview servers block file:// fetch; use http if needed)
   useEffect(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem('recipes') || '[]');
-      if (Array.isArray(stored) && stored.length > 0) return;
-    } catch {}
+    if ((initialState.recipes || []).length > 0) return;
     (async () => {
       try {
         const res = await fetch('./default_recipes.json', { cache: 'no-store' });
@@ -272,10 +410,19 @@ function App() {
           }
           map.set(copy.id, copy);
         });
-        setRecipes(Array.from(map.values()));
+        const seeded = Array.from(map.values());
+        setRecipes(seeded);
+        setFavoriteIds(prev => {
+          if (prev.size > 0) return prev;
+          const seededFavs = seeded
+            .filter(r => Array.isArray(r.tags) && r.tags.some(t => (t ?? '').toLowerCase() === 'favorite'))
+            .map(r => r.id);
+          if (seededFavs.length === 0) return prev;
+          return new Set(seededFavs);
+        });
       } catch (err) { console.warn('Default seed load failed:', err); }
     })();
-  }, []);
+  }, [initialState]);
 
   const t = (key, vars = {}) => {
     let str = (TRANSLATIONS[lang] && TRANSLATIONS[lang][key]) || (TRANSLATIONS.en && TRANSLATIONS.en[key]) || key;
@@ -299,7 +446,8 @@ function App() {
     return { value: '', warning: false };
   };
   // ADD: favorite helper (checks both base tags and i18n tags)
-  const isFavorite = (r) => {
+  const isFavorite = r => {
+    if (favoriteIds.has(r.id)) return true;
     const base = Array.isArray(r.tags) ? r.tags : [];
     const { value: locTags } = getLangField(r, 'tags') || { value: [] };
     const all = [...base, ...(Array.isArray(locTags) ? locTags : [])]
@@ -332,7 +480,7 @@ function App() {
       matchesAdvanced(r) &&
       (!favoritesOnly || isFavorite(r))
     ),
-    [recipes, searchPredicate, advanced, favoritesOnly]
+    [recipes, searchPredicate, advanced, favoritesOnly, favoriteIds]
   );
 
   useEffect(() => {
@@ -343,6 +491,87 @@ function App() {
     });
   }, [visibleRecipes]);
 
+  useEffect(() => {
+    setFavoriteIds(prev => {
+      const valid = new Set(recipes.map(r => r.id));
+      const filtered = Array.from(prev).filter(id => valid.has(id));
+      if (filtered.length === prev.size) return prev;
+      return new Set(filtered);
+    });
+  }, [recipes]);
+
+  useEffect(() => {
+    if (!detailRecipe) return;
+    const latest = recipes.find(r => r.id === detailRecipe.id);
+    if (!latest) {
+      setDetailRecipe(null);
+      if (currentPage === 'detail') setCurrentPage('list');
+      return;
+    }
+    if (latest !== detailRecipe) setDetailRecipe(latest);
+  }, [recipes, detailRecipe, currentPage]);
+
+  const applyHydratedState = useCallback((incoming) => {
+    const sanitized = migrateAppState(incoming);
+    const normalized = (sanitized.recipes || []).map(normalizeRecipe);
+    const validIds = new Set(normalized.map(r => r.id));
+
+    setRecipes(normalized);
+    setSearchQuery(sanitized.searchQuery || '');
+    setAdvanced({
+      meal: new Set(sanitizeArray(sanitized.advanced.meal)),
+      diet: new Set(sanitizeArray(sanitized.advanced.diet)),
+      course: new Set(sanitizeArray(sanitized.advanced.course)),
+      countries: new Set(sanitizeArray(sanitized.advanced.countries)),
+      minHealth: sanitized.advanced.minHealth ?? 1,
+      maxKcal: sanitized.advanced.maxKcal ?? null,
+      maxTime: sanitized.advanced.maxTime ?? null
+    });
+    setLang(LANGS.includes(sanitized.lang) ? sanitized.lang : 'en');
+    setFavoritesOnly(!!sanitized.favoritesOnly);
+
+    const favIds = sanitizeArray(sanitized.favorites).filter(id => validIds.has(id));
+    if (favIds.length === 0) {
+      normalized.forEach(r => {
+        if (Array.isArray(r.tags) && r.tags.some(t => (t ?? '').toLowerCase() === 'favorite')) favIds.push(r.id);
+      });
+    }
+    setFavoriteIds(new Set(favIds));
+
+    const detail = sanitized.detailRecipeId ? normalized.find(r => r.id === sanitized.detailRecipeId) || null : null;
+    setDetailRecipe(detail);
+
+    const selected = sanitizeArray(sanitized.selectedIds).filter(id => validIds.has(id));
+    setSelectedIds(new Set(selected));
+    setSelecting(!!sanitized.selecting && selected.length > 0);
+    setAdvCollapse({ ...defaultAdvCollapse(), ...(sanitized.advCollapse || {}) });
+
+    let nextPage = sanitized.currentPage;
+    if (nextPage === 'detail' && !detail) nextPage = 'list';
+
+    let editorDraft = null;
+    let editorCreate = false;
+    if (sanitized.editor && sanitized.editor.draft && typeof sanitized.editor.draft === 'object') {
+      editorDraft = JSON.parse(JSON.stringify(sanitized.editor.draft));
+      editorCreate = !!sanitized.editor.isCreate;
+    }
+    if (nextPage === 'editor') {
+      if (!editorDraft) nextPage = 'list';
+    } else {
+      editorDraft = null;
+      editorCreate = false;
+    }
+    if (nextPage === 'share') nextPage = 'list';
+    if (!['list', 'detail', 'advanced', 'editor'].includes(nextPage)) nextPage = 'list';
+
+    setEditingRecipe(editorDraft);
+    setIsCreate(editorCreate);
+    setCurrentPage(nextPage);
+    setMenuOpen(false);
+    setShareRecipes([]);
+    setToastMsg(null);
+  }, []);
+
   const collectCountries = useMemo(() => {
     const base = [
       'USA','UK','Canada','France','Netherlands','Spain','Germany','Italy','China','Japan','Thailand','Vietnam',
@@ -352,6 +581,43 @@ function App() {
     const have = Array.from(new Set(recipes.map(r => r.country).filter(Boolean)));
     return Array.from(new Set([...have, ...base])).sort();
   }, [recipes]);
+
+  const serializableState = useMemo(() => {
+    const detailId = detailRecipe?.id || null;
+    const editorPayload = editingRecipe ? { isCreate, draft: editingRecipe } : null;
+    let page = currentPage;
+    if (page === 'detail' && !detailId) page = 'list';
+    if (page === 'editor' && !editorPayload) page = 'list';
+    if (page === 'share') page = 'list';
+    if (!['list', 'detail', 'advanced', 'editor'].includes(page)) page = 'list';
+    return {
+      version: APP_STATE_VERSION,
+      recipes,
+      searchQuery,
+      advanced: {
+        meal: Array.from(advanced.meal),
+        diet: Array.from(advanced.diet),
+        course: Array.from(advanced.course),
+        countries: Array.from(advanced.countries),
+        minHealth: advanced.minHealth ?? 1,
+        maxKcal: advanced.maxKcal ?? null,
+        maxTime: advanced.maxTime ?? null
+      },
+      favorites: Array.from(favoriteIds),
+      favoritesOnly,
+      lang,
+      currentPage: page,
+      detailRecipeId: detailId,
+      editor: editorPayload,
+      advCollapse,
+      selecting,
+      selectedIds: Array.from(selectedIds)
+    };
+  }, [recipes, searchQuery, advanced, favoriteIds, favoritesOnly, lang, currentPage, detailRecipe, editingRecipe, isCreate, advCollapse, selecting, selectedIds]);
+
+  useEffect(() => {
+    saveAppState(serializableState);
+  }, [serializableState]);
 
   // Chips
   const activeFilterChips = [];
@@ -398,7 +664,7 @@ function App() {
     }
     setCurrentPage('editor');
   };
-  const closeEditor = () => { setEditingRecipe(null); setCurrentPage('list'); };
+  const closeEditor = () => { setEditingRecipe(null); setIsCreate(false); setCurrentPage('list'); };
   const saveEditedRecipe = edited => {
     if (edited.i18n) {
       edited.i18n.en = edited.i18n.en || {};
@@ -410,9 +676,10 @@ function App() {
     if (isCreate) {
       const slug = edited.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       edited.id = `${slug}-${Math.random().toString(36).slice(2, 6)}`;
-      setRecipes([edited, ...recipes]);
+      setRecipes(prev => [edited, ...prev]);
     } else {
-      setRecipes(recipes.map(r => (r.id === editingRecipe.id ? edited : r)));
+      const targetId = editingRecipe?.id;
+      setRecipes(prev => prev.map(r => (r.id === targetId ? edited : r)));
     }
     closeEditor(); setDetailRecipe(edited); setCurrentPage('detail');
   };
@@ -421,31 +688,76 @@ function App() {
   const enterSelection = () => { setSelecting(true); setSelectedIds(new Set()); };
   const exitSelection = () => { setSelecting(false); setSelectedIds(new Set()); };
   const toggleSelected = id => setSelectedIds(prev => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
-  const selectAllVisible = () => { const ids = new Set(selectedIds); visibleRecipes.forEach(r => ids.add(r.id)); setSelectedIds(ids); };
+  const selectAllVisible = () => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      visibleRecipes.forEach(r => next.add(r.id));
+      return next;
+    });
+  };
   const bulkDelete = () => {
     if (selectedIds.size === 0) return;
     if (!window.confirm(`Delete ${selectedIds.size} selected recipe(s)?`)) return;
-    setRecipes(recipes.filter(r => !selectedIds.has(r.id))); setSelectedIds(new Set()); setSelecting(false);
+    const idsToRemove = new Set(selectedIds);
+    setRecipes(prev => prev.filter(r => !idsToRemove.has(r.id)));
+    setFavoriteIds(prev => {
+      let changed = false;
+      const next = new Set(prev);
+      idsToRemove.forEach(id => { if (next.delete(id)) changed = true; });
+      return changed ? next : prev;
+    });
+    setSelectedIds(new Set());
+    setSelecting(false);
+    if (detailRecipe && idsToRemove.has(detailRecipe.id)) {
+      setDetailRecipe(null);
+      if (currentPage === 'detail') setCurrentPage('list');
+    }
   };
-  const deleteRecipe = id => { if (!window.confirm('Delete this recipe?')) return; setRecipes(recipes.filter(r => r.id !== id)); };
+  const deleteRecipe = id => {
+    if (!window.confirm('Delete this recipe?')) return;
+    setRecipes(prev => prev.filter(r => r.id !== id));
+    setFavoriteIds(prev => {
+      if (!prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+    setSelectedIds(prev => {
+      if (!prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+    if (detailRecipe && detailRecipe.id === id) {
+      setDetailRecipe(null);
+      if (currentPage === 'detail') setCurrentPage('list');
+    }
+  };
 
   // Favorites: toggle filter and toggle favorite tag on a recipe
   const toggleFavoritesOnly = () => setFavoritesOnly(v => !v);
-  const toggleFavorite = (id) => {
+  const toggleFavorite = id => {
+    const makeFavorite = !favoriteIds.has(id);
+    setFavoriteIds(prev => {
+      const next = new Set(prev);
+      if (makeFavorite) next.add(id); else next.delete(id);
+      return next;
+    });
     setRecipes(prev => prev.map(r => {
       if (r.id !== id) return r;
       const base = Array.isArray(r.tags) ? r.tags : [];
-      const has = base.some(tg => (tg ?? '').toLowerCase() === 'favorite');
-      const nextTags = has ? base.filter(tg => (tg ?? '').toLowerCase() !== 'favorite') : [...base, 'favorite'];
-      return { ...r, tags: nextTags };
+      const hasTag = base.some(tg => (tg ?? '').toLowerCase() === 'favorite');
+      if (makeFavorite && !hasTag) return { ...r, tags: [...base, 'favorite'] };
+      if (!makeFavorite && hasTag) return { ...r, tags: base.filter(tg => (tg ?? '').toLowerCase() !== 'favorite') };
+      return r;
     }));
-    // Keep detail view in sync if open
     setDetailRecipe(prev => {
       if (!prev || prev.id !== id) return prev;
       const base = Array.isArray(prev.tags) ? prev.tags : [];
-      const has = base.some(tg => (tg ?? '').toLowerCase() === 'favorite');
-      const nextTags = has ? base.filter(tg => (tg ?? '').toLowerCase() !== 'favorite') : [...base, 'favorite'];
-      return { ...prev, tags: nextTags };
+      const hasTag = base.some(tg => (tg ?? '').toLowerCase() === 'favorite');
+      if (makeFavorite && !hasTag) return { ...prev, tags: [...base, 'favorite'] };
+      if (!makeFavorite && hasTag) return { ...prev, tags: base.filter(tg => (tg ?? '').toLowerCase() !== 'favorite') };
+      return prev;
     });
   };
 
@@ -468,21 +780,16 @@ function App() {
   // Import/Export/Reset
   const handleImport = async file => {
     try {
-      const items = await importRecipesFromFile(file);
-      const map = new Map(recipes.map(r => [r.id, r]));
-      items.forEach(r => {
-        const nr = normalizeRecipe(r);
-        if (nr && nr.id) map.set(nr.id, nr); else map.set('import-' + Math.random().toString(36).slice(2), nr);
-      });
-      setRecipes(Array.from(map.values()));
+      const payload = await importAppStateFromFile(file);
+      applyHydratedState(payload);
     } catch (err) { alert('Import failed: ' + err.message); }
   };
-  const handleExport = () => exportRecipesToFile(recipes);
+  const handleExport = () => exportAppStateToFile(serializableState);
   const resetRecipes = () => {
     if (!window.confirm('This will remove all saved recipes from this browser. Continue?')) return;
-    localStorage.setItem('recipes', '[]');
-    setRecipes([]); setAdvanced({ meal: new Set(), diet: new Set(), course: new Set(), countries: new Set(), minHealth: 1, maxKcal: null, maxTime: null });
-    setSearchQuery(''); setSelecting(false); setSelectedIds(new Set());
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem('recipes');
+    applyHydratedState(buildDefaultAppState());
   };
 
   // Advanced page
@@ -626,18 +933,21 @@ function App() {
       openEditor, resetRecipes,
       // ADD:
       favoritesOnly,
-      toggleFavorites: toggleFavoritesOnly
+      toggleFavorites: toggleFavoritesOnly,
+      favoriteIds
     }),
     currentPage === 'advanced' && AdvancedPage,
     currentPage === 'detail' && detailRecipe && h(RecipeView, {
       recipe: detailRecipe, onBack: closeDetail, onEdit: openEditor, onShare: shareCurrentRecipe,
       t, FLAG, getLangField, extractVideoId, DEFAULT_THUMB,
       // ADD:
-      onToggleFavorite: toggleFavorite
+      onToggleFavorite: toggleFavorite,
+      favoriteIds
     }),
     currentPage === 'editor' && editingRecipe && h(RecipeEditor, {
       recipe: editingRecipe, isCreate, onCancel: closeEditor, onSave: saveEditedRecipe,
-      t, LANGS, FLAG, collectCountries
+      t, LANGS, FLAG, collectCountries,
+      onDraftChange: setEditingRecipe
     }),
     currentPage === 'share' && SharePage,
     h('div', { className: toastMsg ? 'toast show' : 'toast' }, toastMsg)

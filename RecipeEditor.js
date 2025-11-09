@@ -1,11 +1,15 @@
 // RecipeEditor: create/edit form with i18n tabs; keeps an internal working copy and calls onSave(edited).
 
-export function RecipeEditor({ recipe, isCreate, onCancel, onSave, t, LANGS, FLAG, collectCountries }) {
-  const { useState } = React;
+export function RecipeEditor({ recipe, isCreate, onCancel, onSave, t, LANGS, FLAG, collectCountries, onDraftChange }) {
+  const { useState, useEffect } = React;
   const h = React.createElement;
 
   const [r, setR] = useState(() => JSON.parse(JSON.stringify(recipe)));
   const [editLangTab, setEditLangTab] = useState('en');
+
+  useEffect(() => {
+    if (onDraftChange) onDraftChange(r);
+  }, [r, onDraftChange]);
 
   const updateField = (field, value) => setR(prev => ({ ...prev, [field]: value }));
   const updateMacro = (macroField, value) => setR(prev => ({ ...prev, macros: { ...prev.macros, [macroField]: value } }));
