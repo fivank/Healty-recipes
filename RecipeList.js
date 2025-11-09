@@ -9,7 +9,7 @@ export function RecipeList(props) {
     DEFAULT_THUMB, getLangField, extractVideoId, activeFilterChips,
     onImport, onExport, openEditor, resetRecipes,
     // ADD:
-    favoritesOnly, toggleFavorites, favoriteIds
+    favoritesOnly, toggleFavorites, favoriteIds, cloudSave, cloudImport
   } = props;
 
   const h = React.createElement;
@@ -42,6 +42,10 @@ export function RecipeList(props) {
         h('div', { className: 'menu-sep' }),
         h('button', { className: 'menu-item', onClick: () => { setMenuOpen(false); onExport(); } },
           h('span', { className: 'ic exp' }), ' ', t('Export')),
+        h('button', { className: 'menu-item', onClick: () => { setMenuOpen(false); if (typeof cloudImport === 'function') cloudImport(); } },
+          h('span', { className: 'ic imp' }), ' ', t('Import from Firebase')),
+        h('button', { className: 'menu-item', onClick: () => { setMenuOpen(false); if (typeof cloudSave === 'function') cloudSave(); } },
+          h('span', { className: 'ic exp' }), ' ', t('Save to Firebase')),
         h('button', { className: 'menu-item' },
           h('label', { style: { display: 'flex', alignItems: 'center', gap: '8px', margin: 0, cursor: 'pointer' } },
             h('span', { className: 'ic imp' }), ' ', t('Import'),

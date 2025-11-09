@@ -4,6 +4,7 @@ import { RecipeList } from './RecipeList.js';
 import { RecipeView } from './RecipeView.js';
 import { RecipeEditor } from './RecipeEditor.js';
 import { importAppStateFromFile, exportAppStateToFile } from './ImportExport.js';
+import { initFirebase, ensureSignedIn, saveRemoteState, loadRemoteState } from './firebase.js';
 
 const { useState, useEffect, useMemo, useCallback, Fragment } = React;
 const h = React.createElement;
@@ -66,7 +67,10 @@ const TRANSLATIONS = {
     "Barbeque": "Barbeque","Paleo": "Paleo","Soup": "Soup","Side": "Side","Starter": "Starter","Dessert": "Dessert","Juice": "Juice",
     "Cream-Soup": "Cream-Soup","Smoothy": "Smoothy",
     "Favorite": "Favorite","Add to Favorite": "Add to Favorite","Remove from Favorites": "Remove from Favorites",
-    "Show favorites": "Show favorites","Show all": "Show all"
+  "Show favorites": "Show favorites","Show all": "Show all",
+  "Save to Firebase": "Save to Firebase","Import from Firebase": "Import from Firebase",
+  "Saved to Firebase": "Saved to Firebase","Imported from Firebase": "Imported from Firebase",
+  "No data in Firebase": "No data in Firebase"
   },
   es: {
     "Add": "Añadir","Import": "Importar","Export": "Exportar","Reset (forget recipes)": "Restablecer (olvidar recetas)",
@@ -98,7 +102,10 @@ const TRANSLATIONS = {
     "Anti-inflammatory": "Antiinflamatorio","Barbeque": "Barbacoa","Paleo": "Paleo","Soup": "Sopa","Side": "Acompañamiento","Starter": "Entrante",
     "Dessert": "Postre","Juice": "Jugo","Cream-Soup": "Crema","Smoothy": "Batido",
     "Favorite": "Favorito","Add to Favorite": "Añadir a favorito","Remove from Favorites": "Quitar de favoritos",
-    "Show favorites": "Ver favoritos","Show all": "Ver todos"
+  "Show favorites": "Ver favoritos","Show all": "Ver todos",
+  "Save to Firebase": "Guardar en Firebase","Import from Firebase": "Importar desde Firebase",
+  "Saved to Firebase": "Guardado en Firebase","Imported from Firebase": "Importado desde Firebase",
+  "No data in Firebase": "Sin datos en Firebase"
   },
   de: {
     "Add": "Hinzufügen","Import": "Importieren","Export": "Exportieren","Reset (forget recipes)": "Zurücksetzen (Rezepte vergessen)",
@@ -133,7 +140,10 @@ const TRANSLATIONS = {
     "Anti-inflammatory": "Entzündungshemmend","Barbeque": "Barbecue","Paleo": "Paleo","Soup": "Suppe","Side": "Beilage","Starter": "Vorspeise",
     "Dessert": "Dessert","Juice": "Saft","Cream-Soup": "Cremesuppe","Smoothy": "Smoothie",
     "Favorite": "Favorit","Add to Favorite": "Zu Favoriten hinzufügen","Remove from Favorites": "Aus Favoriten entfernen",
-    "Show favorites": "Favoriten anzeigen","Show all": "Alle anzeigen"
+  "Show favorites": "Favoriten anzeigen","Show all": "Alle anzeigen",
+  "Save to Firebase": "In Firebase speichern","Import from Firebase": "Aus Firebase importieren",
+  "Saved to Firebase": "In Firebase gespeichert","Imported from Firebase": "Aus Firebase importiert",
+  "No data in Firebase": "Keine Daten in Firebase"
   },
   fr: {
     "Add": "Ajouter","Import": "Importer","Export": "Exporter","Reset (forget recipes)": "Réinitialiser (oublier les recettes)",
@@ -167,7 +177,10 @@ const TRANSLATIONS = {
     "Low Glycemic Index": "Index glycémique bas","Anti-inflammatory": "Anti-inflammatoire","Barbeque": "Barbecue","Paleo": "Paléo",
     "Soup": "Soupe","Side": "Accompagnement","Starter": "Entrée","Dessert": "Dessert","Juice": "Jus","Cream-Soup": "Velouté","Smoothy": "Smoothie",
     "Favorite": "Favori","Add to Favorite": "Ajouter aux favoris","Remove from Favorites": "Retirer des favoris",
-    "Show favorites": "Afficher favoris","Show all": "Afficher tout"
+  "Show favorites": "Afficher favoris","Show all": "Afficher tout",
+  "Save to Firebase": "Enregistrer sur Firebase","Import from Firebase": "Importer depuis Firebase",
+  "Saved to Firebase": "Enregistré sur Firebase","Imported from Firebase": "Importé depuis Firebase",
+  "No data in Firebase": "Aucune donnée sur Firebase"
   }
 };
 
@@ -329,6 +342,7 @@ function extractVideoId(url) {
 }
 
 function App() {
+  useEffect(() => { try { initFirebase(); } catch {} }, []);
   const initialState = useMemo(() => loadAppState(), []);
   const normalizedSeed = useMemo(
     () => (initialState.recipes || []).map(normalizeRecipe),
@@ -792,6 +806,35 @@ function App() {
     applyHydratedState(buildDefaultAppState());
   };
 
+  // Cloud actions (Firebase)
+  const saveToFirebase = async () => {
+    try {
+      const user = await ensureSignedIn();
+      await saveRemoteState(user.uid, serializableState);
+      setToastMsg(t('Saved to Firebase'));
+    } catch (err) {
+      alert('Cloud save failed: ' + (err.message || err));
+    } finally {
+      setMenuOpen(false);
+    }
+  };
+  const importFromFirebase = async () => {
+    try {
+      const user = await ensureSignedIn();
+      const res = await loadRemoteState(user.uid);
+      if (res && res.state) {
+        applyHydratedState(res.state);
+        setToastMsg(t('Imported from Firebase'));
+      } else {
+        setToastMsg(t('No data in Firebase'));
+      }
+    } catch (err) {
+      alert('Cloud import failed: ' + (err.message || err));
+    } finally {
+      setMenuOpen(false);
+    }
+  };
+
   // Advanced page
   const AdvancedPage = h('section', { className: 'page', style: { display: 'block' }, id: 'pageAdvanced' },
     h('header', null,
@@ -934,7 +977,9 @@ function App() {
       // ADD:
       favoritesOnly,
       toggleFavorites: toggleFavoritesOnly,
-      favoriteIds
+      favoriteIds,
+      cloudSave: saveToFirebase,
+      cloudImport: importFromFirebase
     }),
     currentPage === 'advanced' && AdvancedPage,
     currentPage === 'detail' && detailRecipe && h(RecipeView, {
