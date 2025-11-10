@@ -25,56 +25,69 @@ export function RecipeList(props) {
     return all.slice(0, 5).join(' · ') + (all.length > 5 ? ' …' : '');
   };
 
-  const Header = h('header', null,
+  const Header = h('header', { className: 'app-header' },
     h('div', { className: 'brand' },
       h('div', { className: 'logo', 'aria-hidden': 'true' }),
-      h('div', null, 'HealthyRecipeApp')
+      h('div', { className: 'brand-copy' },
+        h('h1', { className: 'app-title' }, 'Healthy Recipes'),
+        h('p', { className: 'app-subtitle' }, t('Discover nutritious meals for every day') || 'Discover nutritious meals for every day')
+      )
     ),
-    h('div', { className: 'menu' + (menuOpen ? ' open' : ''), id: 'menu' },
+    h('div', { className: 'header-actions' },
       h('button', {
-        className: 'hamburger',
-        onClick: e => { e.stopPropagation(); setMenuOpen(!menuOpen); },
-        'aria-label': 'Menu'
-      }),
-      h('div', { className: 'menu-panel', role: 'menu', 'aria-labelledby': 'hamburger' },
-        h('button', { className: 'menu-item', onClick: () => { setMenuOpen(false); openEditor(null); } },
-          h('span', { className: 'ic add' }), ' ', t('Add')),
-        h('div', { className: 'menu-sep' }),
-        h('button', { className: 'menu-item', onClick: () => { setMenuOpen(false); onExport(); } },
-          h('span', { className: 'ic exp' }), ' ', t('Export')),
-        h('button', { className: 'menu-item', onClick: () => { setMenuOpen(false); if (typeof cloudImport === 'function') cloudImport(); } },
-          h('span', { className: 'ic imp' }), ' ', t('Import from Firebase')),
-        h('button', { className: 'menu-item', onClick: () => { setMenuOpen(false); if (typeof cloudSave === 'function') cloudSave(); } },
-          h('span', { className: 'ic exp' }), ' ', t('Save to Firebase')),
-        h('button', { className: 'menu-item' },
-          h('label', { style: { display: 'flex', alignItems: 'center', gap: '8px', margin: 0, cursor: 'pointer' } },
-            h('span', { className: 'ic imp' }), ' ', t('Import'),
-            h('input', {
-              type: 'file', accept: '.json,application/json', style: { display: 'none' },
-              onChange: e => {
-                const file = e.target.files && e.target.files[0];
-                if (file) onImport(file);
-                e.target.value = '';
-                setMenuOpen(false);
-              }
-            })
-          )
-        ),
-        h('div', { className: 'menu-sep' }),
-        h('button', { className: 'menu-item', onClick: () => { setMenuOpen(false); resetRecipes(); } },
-          h('span', { className: 'ic del' }), ' ', t('Reset (forget recipes)')),
-        h('div', { className: 'menu-sep' }),
-        h('div', { style: { padding: '4px 10px', fontSize: '12px', fontWeight: 700, opacity: 0.7 } }, t('Language')),
-        h('button', { className: 'menu-item', onClick: () => { setLang('en'); setMenuOpen(false); } }, FLAG_EMOJI.en, ' ', t('English')),
-        h('button', { className: 'menu-item', onClick: () => { setLang('es'); setMenuOpen(false); } }, FLAG_EMOJI.es, ' ', t('Spanish')),
-        h('button', { className: 'menu-item', onClick: () => { setLang('de'); setMenuOpen(false); } }, FLAG_EMOJI.de, ' ', t('German')),
-        h('button', { className: 'menu-item', onClick: () => { setLang('fr'); setMenuOpen(false); } }, FLAG_EMOJI.fr, ' ', t('French'))
+        className: 'btn soft icon',
+        onClick: () => (selecting ? exitSelection() : enterSelection()),
+        'aria-pressed': selecting,
+        'aria-label': selecting ? t('Cancel Select') : t('Select')
+      },
+      h('span', { className: selecting ? 'ic close' : 'ic sel' }),
+      h('span', { className: 'btn-label' }, selecting ? t('Cancel Select') : t('Select'))),
+      h('div', { className: 'menu' + (menuOpen ? ' open' : ''), id: 'menu' },
+        h('button', {
+          className: 'hamburger',
+          onClick: e => { e.stopPropagation(); setMenuOpen(!menuOpen); },
+          'aria-label': 'Menu'
+        }),
+        h('div', { className: 'menu-panel', role: 'menu', 'aria-labelledby': 'hamburger' },
+          h('button', { className: 'menu-item', onClick: () => { setMenuOpen(false); openEditor(null); } },
+            h('span', { className: 'ic add' }), ' ', t('Add')),
+          h('div', { className: 'menu-sep' }),
+          h('button', { className: 'menu-item', onClick: () => { setMenuOpen(false); onExport(); } },
+            h('span', { className: 'ic exp' }), ' ', t('Export')),
+          h('button', { className: 'menu-item', onClick: () => { setMenuOpen(false); if (typeof cloudImport === 'function') cloudImport(); } },
+            h('span', { className: 'ic imp' }), ' ', t('Import from Firebase')),
+          h('button', { className: 'menu-item', onClick: () => { setMenuOpen(false); if (typeof cloudSave === 'function') cloudSave(); } },
+            h('span', { className: 'ic exp' }), ' ', t('Save to Firebase')),
+          h('button', { className: 'menu-item' },
+            h('label', { style: { display: 'flex', alignItems: 'center', gap: '8px', margin: 0, cursor: 'pointer' } },
+              h('span', { className: 'ic imp' }), ' ', t('Import'),
+              h('input', {
+                type: 'file', accept: '.json,application/json', style: { display: 'none' },
+                onChange: e => {
+                  const file = e.target.files && e.target.files[0];
+                  if (file) onImport(file);
+                  e.target.value = '';
+                  setMenuOpen(false);
+                }
+              })
+            )
+          ),
+          h('div', { className: 'menu-sep' }),
+          h('button', { className: 'menu-item', onClick: () => { setMenuOpen(false); resetRecipes(); } },
+            h('span', { className: 'ic del' }), ' ', t('Reset (forget recipes)')),
+          h('div', { className: 'menu-sep' }),
+          h('div', { style: { padding: '4px 10px', fontSize: '12px', fontWeight: 700, opacity: 0.7 } }, t('Language')),
+          h('button', { className: 'menu-item', onClick: () => { setLang('en'); setMenuOpen(false); } }, FLAG_EMOJI.en, ' ', t('English')),
+          h('button', { className: 'menu-item', onClick: () => { setLang('es'); setMenuOpen(false); } }, FLAG_EMOJI.es, ' ', t('Spanish')),
+          h('button', { className: 'menu-item', onClick: () => { setLang('de'); setMenuOpen(false); } }, FLAG_EMOJI.de, ' ', t('German')),
+          h('button', { className: 'menu-item', onClick: () => { setLang('fr'); setMenuOpen(false); } }, FLAG_EMOJI.fr, ' ', t('French'))
+        )
       )
     )
   );
 
   const SearchBar = h('div', { className: 'searchbar' },
-    h('div', { className: 'search', title: 'Boolean: comma/+ = AND, / = OR, parentheses ()' },
+    h('label', { className: 'search-field', title: 'Boolean: comma/+ = AND, / = OR, parentheses ()' },
       h('span', { className: 'ic search', 'aria-hidden': 'true' }),
       h('input', {
         value: searchQuery,
@@ -82,24 +95,34 @@ export function RecipeList(props) {
         placeholder: t('Search recipes…')
       })
     ),
-    h('button', { className: 'btn sm icon', onClick: openAdvanced },
-      h('span', { className: 'ic adv' }), t('Advanced Filter'))
+    h('button', { className: 'btn circle', onClick: openAdvanced, 'aria-label': t('Advanced Filter') },
+      h('span', { className: 'ic adv' }))
   );
 
-  const Actions = h('div', { className: 'actions-row', id: 'topActions' },
-    h('button', { className: 'btn sm icon hidden', id: 'btnAdd' }, h('span', { className: 'ic add' }), 'Add'),
-    h('button', { className: 'btn sm icon', onClick: () => (selecting ? exitSelection() : enterSelection()) },
-      h('span', { className: 'ic sel' }), selecting ? t('Cancel Select') : t('Select')),
-    // ADD: Show favorites toggle
-    h('button', { className: 'btn sm icon', onClick: toggleFavorites }, '❤️ ', favoritesOnly ? t('Show all') : t('Show favorites')),
-    h('button', { className: 'btn sm icon hidden', id: 'btnImport' }, h('span', { className: 'ic imp' }), 'Import'),
-    h('button', { className: 'btn sm icon hidden', id: 'btnExport' }, h('span', { className: 'ic exp' }), 'Export'),
-    selecting && h(Fragment, null,
-      h('button', { className: 'btn sm icon', onClick: selectAllVisible }, h('span', { className: 'ic all' }), t('Select All')),
-      h('button', { className: 'btn sm icon', onClick: openShare }, h('span', { className: 'ic share' }), t('Share')),
-      h('button', { className: 'btn sm icon danger', onClick: bulkDelete }, h('span', { className: 'ic del' }), t('Delete'))
-    ),
-    h('span', { className: 'chip' }, t('Saved'), ': ',
+  const QuickFilters = h('div', { className: 'quick-filters' },
+    h('button', {
+      className: 'chip-button' + (!favoritesOnly ? ' active' : ''),
+      onClick: () => { if (favoritesOnly) toggleFavorites(); }
+    }, t('Show all')),
+    h('button', {
+      className: 'chip-button' + (favoritesOnly ? ' active' : ''),
+      onClick: () => { if (!favoritesOnly) toggleFavorites(); }
+    }, '❤️ ', t('Show favorites'))
+  );
+
+  const SelectionBar = selecting ? h('div', { className: 'selection-bar', role: 'region', 'aria-live': 'polite' },
+    h('span', { className: 'selection-count' }, `${selectedIds.size} ${t('selected')}`),
+    h('div', { className: 'selection-actions' },
+      h('button', { className: 'btn soft sm', onClick: selectAllVisible }, h('span', { className: 'ic all' }), t('Select All')),
+      h('button', { className: 'btn soft sm', onClick: openShare }, h('span', { className: 'ic share' }), t('Share')),
+      h('button', { className: 'btn soft sm danger', onClick: bulkDelete }, h('span', { className: 'ic del' }), t('Delete')),
+      h('button', { className: 'btn soft sm', onClick: exitSelection }, t('Cancel Select'))
+    )
+  ) : null;
+
+  const Stats = h('div', { className: 'result-count' },
+    h('span', { className: 'dot' }),
+    h('span', null, t('Saved'), ': ',
       h('strong', { id: 'statCount' }, `${visibleRecipes.length} ${t('of')} ${recipes.length}`)
     )
   );
@@ -152,32 +175,40 @@ export function RecipeList(props) {
           }
         }
       },
-      h('div', { className: 'top' },
-        h('div', { className: 'name' }, nameVal || '', nameWarn ? h('span', { title: 'English fallback', style: { fontSize: '11px', marginLeft: '4px', opacity: 0.6 } }, '*') : null),
-        h('div', { className: 'pill health' }, h('span', { className: 'ic star' }), r.healthScore ?? '-')
+      h('div', { className: 'card-media' },
+        h('img', {
+          src: thumbUrl,
+          alt: nameVal || '',
+          onError: e => { e.target.onerror = null; e.target.src = DEFAULT_THUMB; }
+        }),
+        h('div', { className: 'card-rating' }, h('span', { className: 'ic star' }), r.healthScore ?? '-'),
+        isFav && h('div', { className: 'favorite-badge', title: t('Favorite') }, '❤️')
       ),
-      h('div', { className: 'thumb' }, h('img', { src: thumbUrl, alt: nameVal || '', onError: e => { e.target.onerror = null; e.target.src = DEFAULT_THUMB; } })),
-      h('div', { className: 'meta' },
-        h('span', { className: 'pill' }, h('span', { className: 'ic kcal' }), r.calories ?? '—', ' kcal'),
-        h('span', { className: 'pill' }, h('span', { className: 'ic time' }), r.timeMinutes ?? '—', ' min'),
-        h('span', { className: 'pill' }, h('span', { className: 'ic country' }), (FLAG[r.country] || '🏳️'), ' ', r.country || '')
-      ),
-      h('div', { className: 'tags' },
-        isFav && h('span', { className: 'tag' }, '❤️ ', t('Favorite')),
-        mealTranslated.map((tg, i) => h('span', { key: 'mt-' + i, className: 'tag' }, tg)),
-        otherTranslated.slice(0, 3).map((tg, i) => h('span', { key: 'ot-' + i, className: 'tag' }, tg)),
-        r.videoLinks && r.videoLinks.length > 0 ? h('span', { className: 'tag tag-video', title: t('Video available') }, t('Video')) : null
-      ),
-      h('div', { className: 'mini-ingredients' }, miniIngredients(r)),
-      h('div', { className: 'select-box' }, h('span', { className: 'select-tick' }), t('Select')),
-      h('div', { className: 'actions-card' },
-        h('div', { style: { display: 'flex', gap: '6px' } },
-          h('button', { className: 'btn sm icon', onClick: () => openDetail(r) }, h('span', { className: 'ic view' }), t('View'))
+      h('div', { className: 'card-body' },
+        h('div', { className: 'name' }, nameVal || '', nameWarn ? h('span', { title: 'English fallback', className: 'fallback-indicator' }, '*') : null),
+        h('div', { className: 'meta' },
+          h('span', { className: 'meta-item' }, h('span', { className: 'ic kcal' }), r.calories ?? '—', ' kcal'),
+          h('span', { className: 'meta-item' }, h('span', { className: 'ic time' }), r.timeMinutes ?? '—', ' min'),
+          h('span', { className: 'meta-item country' }, (FLAG[r.country] || '🏳️'), ' ', r.country || '')
         ),
-        h('button', { className: 'btn sm icon ghost', onClick: () => deleteRecipe(r.id) }, h('span', { className: 'ic del' }), t('Delete'))
-      ));
+        h('div', { className: 'tags' },
+          mealTranslated.map((tg, i) => h('span', { key: 'mt-' + i, className: 'tag' }, tg)),
+          otherTranslated.slice(0, 2).map((tg, i) => h('span', { key: 'ot-' + i, className: 'tag' }, tg)),
+          r.videoLinks && r.videoLinks.length > 0 ? h('span', { className: 'tag tag-video', title: t('Video available') }, t('Video')) : null
+        ),
+        h('div', { className: 'mini-ingredients' }, miniIngredients(r))
+      ),
+      h('div', { className: 'card-footer' },
+        h('button', { className: 'btn soft sm', onClick: () => openDetail(r) }, h('span', { className: 'ic view' }), t('View')),
+        h('button', { className: 'btn soft sm danger', onClick: () => deleteRecipe(r.id) }, h('span', { className: 'ic del' }), t('Delete'))
+      ),
+      h('div', { className: 'select-box' }, h('span', { className: 'select-tick' }), t('Select'))
+    );
     })
   );
 
-  return h('div', { className: 'container' }, Header, SearchBar, Actions, Chips, Grid);
+  return h(Fragment, null,
+    h('div', { className: 'container main-view' }, Header, SearchBar, QuickFilters, Stats, Chips, SelectionBar, Grid),
+    h('button', { className: 'floating-add', onClick: () => openEditor(null), 'aria-label': t('Add Recipe') }, h('span', { className: 'ic add' }))
+  );
 }
