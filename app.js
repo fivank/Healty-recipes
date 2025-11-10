@@ -36,16 +36,17 @@ const MEAL_COLORS = {
 const TRANSLATIONS = {
   en: {
     "Add": "Add","Import": "Import","Export": "Export","Reset (forget recipes)": "Reset (forget recipes)",
-    "Search recipes…": "Search recipes…","Advanced": "Advanced","Select": "Select","Cancel Select": "Cancel Select",
+    "Search recipes…": "Search recipes…","Find easy, healthy recipes for every day": "Find easy, healthy recipes for every day",
+    "Simply Healthy": "Simply Healthy","Advanced": "Advanced","Select": "Select","Cancel Select": "Cancel Select",
     "Select All": "Select All","Share": "Share","Delete": "Delete","Saved": "Filtered recipes saved","of": "of",
-    "Advanced Search": "Advanced Filter","Filters": "Filters","Dietary Needs": "Dietary Needs","Cuisine": "Cuisine","Time to Cook": "Time to Cook",
-    "Simple": "Simple","Advanced": "Advanced","Meal (OR inside)": "Meal (OR inside)","Diet": "Diet","Course": "Course",
+    "Advanced Search": "Advanced Filter","Filters": "Filters","Dietary Needs": "Dietary Needs","Cuisine": "Cuisine","Time to Cook": "Time to Cook","Preferences": "Preferences",
+    "Simple": "Simple","Advanced": "Advanced","Meal (OR inside)": "Meal (OR inside)","Meal": "Meal","Diet": "Diet","Course": "Course",
     "Constraints": "Constraints","Minimum Health Rating": "Minimum Health Rating","Maximum Calories (kcal)": "Maximum Calories (kcal)",
     "Max Preparation Time (minutes)": "Max Preparation Time (minutes)","Countries": "Countries","Reset": "Reset","Apply": "Apply",
     "Back": "Back","View Mode": "View Mode","Tags": "Tags","Info": "Info","Ingredients": "Ingredients","Preparation": "Preparation",
     "Optional / Enrichment": "Optional / Enrichment","Preparation — Advanced": "Preparation — Advanced","Chef Tips": "Chef Tips",
     "Dietitian Tips & Macros": "Dietitian Tips & Macros","Videos": "Videos","Switch to Advanced": "Switch to Advanced",
-    "Switch to Simple": "Switch to Simple","View": "View","Edit": "Edit","Name": "Name","Country": "Country","Meal Tags": "Meal Tags",
+    "Switch to Simple": "Switch to Simple","View": "View","View recipe": "View recipe","Edit": "Edit","Name": "Name","Country": "Country","Meal Tags": "Meal Tags",
     "Other Tags": "Other Tags","Health Score (1–10)": "Health Score (1–10)","Calories (kcal)": "Calories (kcal)","Time (minutes)": "Time (minutes)",
     "Difficulty (text)": "Difficulty (text)","Optional Ingredients": "Optional Ingredients","Preparation (Simple)": "Preparation (Simple)",
     "Preparation (Advanced)": "Preparation (Advanced)","Macros (g)": "Macros (g)","Protein": "Protein","Fat": "Fat","Carbs": "Carbs",
@@ -75,16 +76,17 @@ const TRANSLATIONS = {
   },
   es: {
     "Add": "Añadir","Import": "Importar","Export": "Exportar","Reset (forget recipes)": "Restablecer (olvidar recetas)",
-    "Search recipes…": "Buscar recetas…","Advanced": "Avanzado","Select": "Seleccionar","Cancel Select": "Cancelar selección",
+    "Search recipes…": "Buscar recetas…","Find easy, healthy recipes for every day": "Encuentra recetas fáciles y saludables para cada día",
+    "Simply Healthy": "Simplemente Saludable","Advanced": "Avanzado","Select": "Seleccionar","Cancel Select": "Cancelar selección",
     "Select All": "Seleccionar todo","Share": "Compartir","Delete": "Eliminar","Saved": "Recetas filtradas guardadas","of": "de",
-    "Advanced Search": "Filtro avanzada","Filters": "Filtros","Dietary Needs": "Necesidades dietéticas","Cuisine": "Cocina","Time to Cook": "Tiempo de cocción",
-    "Simple": "Simple","Advanced": "Avanzado","Meal (OR inside)": "Comida (OR dentro)","Diet": "Dieta","Course": "Curso",
+    "Advanced Search": "Filtro avanzada","Filters": "Filtros","Dietary Needs": "Necesidades dietéticas","Cuisine": "Cocina","Time to Cook": "Tiempo de cocción","Preferences": "Preferencias",
+    "Simple": "Simple","Advanced": "Avanzado","Meal (OR inside)": "Comida (OR dentro)","Meal": "Comida","Diet": "Dieta","Course": "Curso",
     "Constraints": "Restricciones","Minimum Health Rating": "Puntuación mínima de salud","Maximum Calories (kcal)": "Calorías máximas (kcal)",
     "Max Preparation Time (minutes)": "Tiempo máximo de preparación (minutos)","Countries": "Países","Reset": "Restablecer","Apply": "Aplicar",
     "Back": "Atrás","View Mode": "Modo de vista","Tags": "Etiquetas","Info": "Información","Ingredients": "Ingredientes","Preparation": "Preparación",
     "Optional / Enrichment": "Opcional / Enriquecimiento","Preparation — Advanced": "Preparación — Avanzada","Chef Tips": "Consejos del chef",
     "Dietitian Tips & Macros": "Consejos del dietista y macros","Videos": "Videos","Switch to Advanced": "Cambiar a avanzado",
-    "Switch to Simple": "Cambiar a simple","View": "Ver","Edit": "Editar","Name": "Nombre","Country": "País","Meal Tags": "Etiquetas de comida",
+    "Switch to Simple": "Cambiar a simple","View": "Ver","View recipe": "Ver receta","Edit": "Editar","Name": "Nombre","Country": "País","Meal Tags": "Etiquetas de comida",
     "Other Tags": "Otras etiquetas","Health Score (1–10)": "Puntuación de salud (1–10)","Calories (kcal)": "Calorías (kcal)",
     "Time (minutes)": "Tiempo (minutos)","Difficulty (text)": "Dificultad (texto)","Optional Ingredients": "Ingredientes opcionales",
     "Preparation (Simple)": "Preparación (simple)","Preparation (Advanced)": "Preparación (avanzada)","Macros (g)": "Macros (g)",
@@ -111,16 +113,17 @@ const TRANSLATIONS = {
   },
   de: {
     "Add": "Hinzufügen","Import": "Importieren","Export": "Exportieren","Reset (forget recipes)": "Zurücksetzen (Rezepte vergessen)",
-    "Search recipes…": "Rezepte suchen…","Advanced": "Erweitert","Select": "Auswählen","Cancel Select": "Auswahl abbrechen",
+    "Search recipes…": "Rezepte suchen…","Find easy, healthy recipes for every day": "Finde einfache, gesunde Rezepte für jeden Tag",
+    "Simply Healthy": "Einfach Gesund","Advanced": "Erweitert","Select": "Auswählen","Cancel Select": "Auswahl abbrechen",
     "Select All": "Alle auswählen","Share": "Teilen","Delete": "Löschen","Saved": "Gespeicherte gefilterte Rezepte","of": "von",
-    "Advanced Search": "Erweiterte Filter","Filters": "Filter","Dietary Needs": "Ernährungsbedürfnisse","Cuisine": "Küche","Time to Cook": "Kochzeit",
-    "Simple": "Einfach","Advanced": "Fortgeschritten","Meal (OR inside)": "Mahlzeit (ODER innen)","Diet": "Ernährung","Course": "Gang",
+    "Advanced Search": "Erweiterte Filter","Filters": "Filter","Dietary Needs": "Ernährungsbedürfnisse","Cuisine": "Küche","Time to Cook": "Kochzeit","Preferences": "Vorlieben",
+    "Simple": "Einfach","Advanced": "Fortgeschritten","Meal (OR inside)": "Mahlzeit (ODER innen)","Meal": "Mahlzeit","Diet": "Ernährung","Course": "Gang",
     "Constraints": "Einschränkungen","Minimum Health Rating": "Mindestgesundheitsbewertung","Maximum Calories (kcal)": "Maximale Kalorien (kcal)",
     "Max Preparation Time (minutes)": "Maximale Zubereitungszeit (Minuten)","Countries": "Länder","Reset": "Zurücksetzen","Apply": "Anwenden",
     "Back": "Zurück","View Mode": "Ansicht","Tags": "Tags","Info": "Informationen","Ingredients": "Zutaten","Preparation": "Zubereitung",
     "Optional / Enrichment": "Optional / Anreicherung","Preparation — Advanced": "Zubereitung — Fortgeschritten","Chef Tips": "Chef-Tipps",
     "Dietitian Tips & Macros": "Ernährungsberater-Tipps & Makros","Videos": "Videos","Switch to Advanced": "Zu Erweitert wechseln",
-    "Switch to Simple": "Zu Einfach wechseln","View": "Ansicht","Edit": "Bearbeiten","Name": "Name","Country": "Land",
+    "Switch to Simple": "Zu Einfach wechseln","View": "Ansicht","View recipe": "Rezept ansehen","Edit": "Bearbeiten","Name": "Name","Country": "Land",
     "Meal Tags": "Mahlzeit-Tags","Other Tags": "Andere Tags","Health Score (1–10)": "Gesundheitswert (1–10)","Calories (kcal)": "Kalorien (kcal)",
     "Time (minutes)": "Zeit (Minuten)","Difficulty (text)": "Schwierigkeit (Text)","Optional Ingredients": "Optionale Zutaten",
     "Preparation (Simple)": "Zubereitung (einfach)","Preparation (Advanced)": "Zubereitung (fortgeschritten)","Macros (g)": "Makros (g)",
@@ -150,16 +153,17 @@ const TRANSLATIONS = {
   },
   fr: {
     "Add": "Ajouter","Import": "Importer","Export": "Exporter","Reset (forget recipes)": "Réinitialiser (oublier les recettes)",
-    "Search recipes…": "Rechercher des recettes…","Advanced": "Avancé","Select": "Sélectionner","Cancel Select": "Annuler la sélection",
+    "Search recipes…": "Rechercher des recettes…","Find easy, healthy recipes for every day": "Trouvez des recettes faciles et saines pour chaque jour",
+    "Simply Healthy": "Simplement Sain","Advanced": "Avancé","Select": "Sélectionner","Cancel Select": "Annuler la sélection",
     "Select All": "Tout sélectionner","Share": "Partager","Delete": "Supprimer","Saved": "Recettes filtrées enregistrées","of": "sur",
-    "Advanced Search": "Recherche avancée","Filters": "Filtres","Dietary Needs": "Besoins diététiques","Cuisine": "Cuisine","Time to Cook": "Temps de cuisson",
-    "Simple": "Simple","Advanced": "Avancé","Meal (OR inside)": "Repas (OU à l'intérieur)","Diet": "Régime","Course": "Cours",
+    "Advanced Search": "Recherche avancée","Filters": "Filtres","Dietary Needs": "Besoins diététiques","Cuisine": "Cuisine","Time to Cook": "Temps de cuisson","Preferences": "Préférences",
+    "Simple": "Simple","Advanced": "Avancé","Meal (OR inside)": "Repas (OU à l'intérieur)","Meal": "Repas","Diet": "Régime","Course": "Cours",
     "Constraints": "Contraintes","Minimum Health Rating": "Note de santé minimale","Maximum Calories (kcal)": "Calories maximales (kcal)",
     "Max Preparation Time (minutes)": "Temps de préparation maximal (minutes)","Countries": "Pays","Reset": "Réinitialiser","Apply": "Appliquer",
     "Back": "Retour","View Mode": "Mode d'affichage","Tags": "Étiquettes","Info": "Infos","Ingredients": "Ingrédients","Preparation": "Préparation",
     "Optional / Enrichment": "Optionnel / Enrichissement","Preparation — Advanced": "Préparation — Avancée","Chef Tips": "Conseils du chef",
     "Dietitian Tips & Macros": "Conseils du diététiste & macros","Videos": "Vidéos","Switch to Advanced": "Passer en mode avancé",
-    "Switch to Simple": "Passer en mode simple","View": "Voir","Edit": "Modifier","Name": "Nom","Country": "Pays","Meal Tags": "Tags de repas",
+    "Switch to Simple": "Passer en mode simple","View": "Voir","View recipe": "Voir la recette","Edit": "Modifier","Name": "Nom","Country": "Pays","Meal Tags": "Tags de repas",
     "Other Tags": "Autres tags","Health Score (1–10)": "Score santé (1–10)","Calories (kcal)": "Calories (kcal)","Time (minutes)": "Temps (minutes)",
     "Difficulty (text)": "Difficulté (texte)","Optional Ingredients": "Ingrédients optionnels","Preparation (Simple)": "Préparation (simple)",
     "Preparation (Advanced)": "Préparation (avancée)","Macros (g)": "Macros (g)","Protein": "Protéine","Fat": "Lipides","Carbs": "Glucides",
@@ -851,6 +855,38 @@ function App() {
     ),
     h('div', { className: 'wrap' },
       h('div', { className: 'adv-stack' },
+        h('section', { className: 'adv-card range-card' },
+          h('h3', null, t('Preferences')),
+          h('div', { className: 'range-stack' },
+            h('label', null, t('Minimum Health Rating'), h('span', { className: 'range-value' }, `${advanced.minHealth}/10`)),
+            h('input', { type: 'range', min: 1, max: 10, step: 1, value: advanced.minHealth, onChange: e => setAdvanced(p => ({ ...p, minHealth: parseInt(e.target.value, 10) })) }),
+            h('label', null, t('Maximum Calories (kcal)'), h('span', { className: 'range-value' }, advanced.maxKcal != null ? advanced.maxKcal : '—')),
+            h('input', { type: 'range', min: 0, max: 3000, step: 10, value: advanced.maxKcal != null ? advanced.maxKcal : 0, onChange: e => setAdvanced(p => ({ ...p, maxKcal: parseInt(e.target.value, 10) })) }),
+            h('input', { type: 'number', min: 0, max: 3000, step: 10, value: advanced.maxKcal != null ? advanced.maxKcal : '', onChange: e => setAdvanced(p => ({ ...p, maxKcal: e.target.value.trim() === '' ? null : parseInt(e.target.value, 10) })) }),
+            h('label', null, t('Max Preparation Time (minutes)'), h('span', { className: 'range-value' }, advanced.maxTime != null ? advanced.maxTime : '—')),
+            h('input', { type: 'range', min: 0, max: 180, step: 5, value: advanced.maxTime != null ? advanced.maxTime : 0, onChange: e => setAdvanced(p => ({ ...p, maxTime: parseInt(e.target.value, 10) })) }),
+            h('input', { type: 'number', min: 0, max: 180, step: 5, value: advanced.maxTime != null ? advanced.maxTime : '', onChange: e => setAdvanced(p => ({ ...p, maxTime: e.target.value.trim() === '' ? null : parseInt(e.target.value, 10) })) })
+          )
+        ),
+        h('section', { className: 'adv-card' },
+          h('h3', null, t('Meal')),
+          h('div', { className: 'state-list pill' },
+            MEAL.map(m => h('button', {
+              key: m,
+              className: 'state-chip' + (advanced.meal.has(m) ? ' on' : ''),
+              onClick: () => toggleFilterSet('meal', m)
+            }, t(m)))
+          ),
+          h('div', { className: 'divider soft' }),
+          h('h3', null, t('Course')),
+          h('div', { className: 'state-list pill' },
+            COURSE.map(c => h('button', {
+              key: c,
+              className: 'state-chip' + (advanced.course.has(c) ? ' on' : ''),
+              onClick: () => toggleFilterSet('course', c)
+            }, t(c)))
+          )
+        ),
         h('section', { className: 'adv-card' },
           h('h3', null, t('Dietary Needs')),
           h('div', { className: 'state-list pill' },
@@ -869,38 +905,6 @@ function App() {
               className: 'state-chip flag' + (advanced.countries.has(cty) ? ' on' : ''),
               onClick: () => toggleCountry(cty)
             }, h('span', { className: 'flag' }, FLAG[cty] || '🏳️'), ' ', cty))
-          )
-        ),
-        h('section', { className: 'adv-card' },
-          h('h3', null, t('Meal (OR inside)')),
-          h('div', { className: 'state-list pill' },
-            MEAL.map(m => h('button', {
-              key: m,
-              className: 'state-chip' + (advanced.meal.has(m) ? ' on' : ''),
-              onClick: () => toggleFilterSet('meal', m)
-            }, t(m)))
-          ),
-          h('div', { className: 'divider soft' }),
-          h('h3', null, t('Course')),
-          h('div', { className: 'state-list pill' },
-            COURSE.map(c => h('button', {
-              key: c,
-              className: 'state-chip' + (advanced.course.has(c) ? ' on' : ''),
-              onClick: () => toggleFilterSet('course', c)
-            }, t(c)))
-          )
-        ),
-        h('section', { className: 'adv-card range-card' },
-          h('h3', null, t('Time to Cook')),
-          h('div', { className: 'range-stack' },
-            h('label', null, t('Minimum Health Rating'), h('span', { className: 'range-value' }, `${advanced.minHealth}/10`)),
-            h('input', { type: 'range', min: 1, max: 10, step: 1, value: advanced.minHealth, onChange: e => setAdvanced(p => ({ ...p, minHealth: parseInt(e.target.value, 10) })) }),
-            h('label', null, t('Maximum Calories (kcal)'), h('span', { className: 'range-value' }, advanced.maxKcal != null ? advanced.maxKcal : '—')),
-            h('input', { type: 'range', min: 0, max: 3000, step: 10, value: advanced.maxKcal != null ? advanced.maxKcal : 0, onChange: e => setAdvanced(p => ({ ...p, maxKcal: parseInt(e.target.value, 10) })) }),
-            h('input', { type: 'number', min: 0, max: 3000, step: 10, value: advanced.maxKcal != null ? advanced.maxKcal : '', onChange: e => setAdvanced(p => ({ ...p, maxKcal: e.target.value.trim() === '' ? null : parseInt(e.target.value, 10) })) }),
-            h('label', null, t('Max Preparation Time (minutes)'), h('span', { className: 'range-value' }, advanced.maxTime != null ? advanced.maxTime : '—')),
-            h('input', { type: 'range', min: 0, max: 180, step: 5, value: advanced.maxTime != null ? advanced.maxTime : 0, onChange: e => setAdvanced(p => ({ ...p, maxTime: parseInt(e.target.value, 10) })) }),
-            h('input', { type: 'number', min: 0, max: 180, step: 5, value: advanced.maxTime != null ? advanced.maxTime : '', onChange: e => setAdvanced(p => ({ ...p, maxTime: e.target.value.trim() === '' ? null : parseInt(e.target.value, 10) })) })
           )
         )
       )

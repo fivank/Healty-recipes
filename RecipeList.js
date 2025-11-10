@@ -15,22 +15,12 @@ export function RecipeList(props) {
   const h = React.createElement;
   const Fragment = React.Fragment;
 
-  // Mini ingredient helper (translated)
-  const miniIngredients = r => {
-    const ing = getLangField(r, 'ingredients').value || [];
-    const opt = getLangField(r, 'optionalIngredients').value || [];
-    const names = ing.map(i => i.name);
-    const extras = opt.map(i => i.name);
-    const all = Array.from(new Set([...names, ...extras]));
-    return all.slice(0, 5).join(' · ') + (all.length > 5 ? ' …' : '');
-  };
-
   const Header = h('header', { className: 'app-header' },
     h('div', { className: 'brand' },
       h('div', { className: 'logo', 'aria-hidden': 'true' }),
       h('div', { className: 'brand-copy' },
-        h('h1', { className: 'app-title' }, 'Healthy Recipes'),
-        h('p', { className: 'app-subtitle' }, t('Discover nutritious meals for every day') || 'Discover nutritious meals for every day')
+        h('h1', { className: 'app-title' }, t('Simply Healthy') || 'Simply Healthy'),
+        h('p', { className: 'app-subtitle' }, t('Find easy, healthy recipes for every day') || 'Find easy, healthy recipes for every day')
       )
     ),
     h('div', { className: 'header-actions' },
@@ -153,6 +143,7 @@ export function RecipeList(props) {
         if (orig && ['Breakfast', 'Lunch', 'Dinner', 'Snack'].includes(orig)) mealTranslated.push(translated);
         else otherTranslated.push(translated);
       }
+      const tabLabels = [...mealTranslated, ...otherTranslated.slice(0, 3)].filter(Boolean);
       // Thumbnail
       let thumbUrl = null;
       const vidsVal = getLangField(r, 'videoLinks').value || [];
@@ -181,25 +172,22 @@ export function RecipeList(props) {
           alt: nameVal || '',
           onError: e => { e.target.onerror = null; e.target.src = DEFAULT_THUMB; }
         }),
-        h('div', { className: 'card-rating' }, h('span', { className: 'ic star' }), r.healthScore ?? '-'),
+        h('div', { className: 'card-health' },
+          h('span', { className: 'heart-icon', 'aria-hidden': 'true' }, '💚'),
+          h('span', { className: 'health-value' }, r.healthScore != null ? r.healthScore : '—')
+        ),
         isFav && h('div', { className: 'favorite-badge', title: t('Favorite') }, '❤️')
       ),
       h('div', { className: 'card-body' },
         h('div', { className: 'name' }, nameVal || '', nameWarn ? h('span', { title: 'English fallback', className: 'fallback-indicator' }, '*') : null),
-        h('div', { className: 'meta' },
-          h('span', { className: 'meta-item' }, h('span', { className: 'ic kcal' }), r.calories ?? '—', ' kcal'),
-          h('span', { className: 'meta-item' }, h('span', { className: 'ic time' }), r.timeMinutes ?? '—', ' min'),
-          h('span', { className: 'meta-item country' }, (FLAG[r.country] || '🏳️'), ' ', r.country || '')
-        ),
-        h('div', { className: 'tags' },
-          mealTranslated.map((tg, i) => h('span', { key: 'mt-' + i, className: 'tag' }, tg)),
-          otherTranslated.slice(0, 2).map((tg, i) => h('span', { key: 'ot-' + i, className: 'tag' }, tg)),
-          r.videoLinks && r.videoLinks.length > 0 ? h('span', { className: 'tag tag-video', title: t('Video available') }, t('Video')) : null
-        ),
-        h('div', { className: 'mini-ingredients' }, miniIngredients(r))
+        tabLabels.length > 0 && h('div', { className: 'card-tabs' },
+          tabLabels.map((tg, i) =>
+            h('span', { key: 'tab-' + i, className: 'tab-chip' }, tg)
+          )
+        )
       ),
       h('div', { className: 'card-footer' },
-        h('button', { className: 'btn soft sm', onClick: () => openDetail(r) }, h('span', { className: 'ic view' }), t('View')),
+        h('button', { className: 'btn cta sm', onClick: () => openDetail(r) }, h('span', { className: 'ic view' }), t('View recipe')),
         h('button', { className: 'btn soft sm danger', onClick: () => deleteRecipe(r.id) }, h('span', { className: 'ic del' }), t('Delete'))
       ),
       h('div', { className: 'select-box' }, h('span', { className: 'select-tick' }), t('Select'))
