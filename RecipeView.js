@@ -32,115 +32,92 @@ export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangFi
   }
   if (!thumbUrl) thumbUrl = DEFAULT_THUMB;
 
-  return h('section', { className: 'page', style: { display: 'block' }, id: 'pageDetail' },
-    h('header', { className: 'fullwidth' },
-      h('button', { className: 'back', onClick: onBack }, h('span', { className: 'ic back' }), ' ', t('Back')),
-      h('div', { className: 'title' },
-        nameVal || t('Recipe'),
-        nameWarn ? h('span', { title: 'English fallback', style: { fontSize: '11px', marginLeft: '4px', opacity: 0.6 } }, '*') : null
+  return h('section', { className: 'page page-detail', style: { display: 'block' }, id: 'pageDetail' },
+    h('div', { className: 'detail-hero' },
+      h('img', {
+        src: thumbUrl,
+        alt: nameVal || '',
+        onError: e => { e.target.onerror = null; e.target.src = DEFAULT_THUMB; }
+      }),
+      h('div', { className: 'hero-bar' },
+        h('button', { className: 'icon-btn ghost', onClick: onBack, 'aria-label': t('Back') }, '←'),
+        h('div', { className: 'hero-actions' },
+          h('button', { className: 'icon-btn ghost', onClick: onShare }, '🔗'),
+          h('button', { className: 'icon-btn ghost', onClick: () => onEdit(r) }, '✏️'),
+          onToggleFavorite && h('button', { className: 'icon-btn ghost heart', onClick: () => onToggleFavorite(r.id) }, isFav ? '❤️' : '🤍')
+        )
       ),
-      h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center' } },
-        h('div', { className: 'flag' }, FLAG[r.country] || '🏳️'),
-        h('button', { className: 'btn sm icon', onClick: onShare }, h('span', { className: 'ic share' }), t('Share')),
-  h('button', { className: 'btn sm icon', onClick: () => onEdit(r) }, h('span', { className: 'ic edit' }), t('Edit')),
-  // ADD: Favorite toggle button (uses emoji, no CSS icon needed)
-  onToggleFavorite && h('button', { className: 'btn sm', onClick: () => onToggleFavorite(r.id) }, '❤️ ', isFav ? t('Remove from Favorites') : t('Add to Favorite'))
+      h('div', { className: 'hero-info' },
+        h('div', { className: 'hero-meta' },
+          h('span', { className: 'hero-flag' }, FLAG[r.country] || '🏳️'),
+          h('span', { className: 'hero-time' }, h('span', { className: 'ic time' }), ' ', r.timeMinutes ?? '—', ' min'),
+          h('span', { className: 'hero-health' }, h('span', { className: 'ic star' }), ' ', r.healthScore ?? '-', '/10')
+        ),
+        h('h2', { className: 'hero-title' },
+          nameVal || t('Recipe'),
+          nameWarn ? h('span', { title: 'English fallback', className: 'fallback-indicator' }, '*') : null
+        ),
+        h('p', { className: 'hero-sub' }, chefTipsVal || dietTipsVal || t('Dietitian Tips & Macros'))
       )
     ),
-    h('div', { className: 'thumb-full' },
-      h('img', {
-        src: thumbUrl, alt: nameVal || '',
-        onError: e => { e.target.onerror = null; e.target.src = DEFAULT_THUMB; }
-      })
-    ),
-    h('div', { className: 'wrap fullwidth' },
-      h('div', { className: 'row' },
-        h('h5', null, t('View Mode')),
-        h('div', { className: 'block2' },
-          h('button', { className: 'btn sm', onClick: () => setViewMode(viewMode === 'simple' ? 'advanced' : 'simple') },
-            viewMode === 'simple' ? t('Switch to Advanced') : t('Switch to Simple'))
-        )
-      ),
-      h('div', { className: 'row' },
-        h('h5', null, h('span', { className: 'ic tags' }), ' ', t('Tags')),
-        h('div', { className: 'block2', id: 'dTags' },
-          isFav && h('span', { className: 'tag', style: { marginRight: '6px' } }, '❤️ ', t('Favorite')),
-          (nonFavoriteTags || []).map((tg, i) => h('span', { key: i, className: 'tag', style: { marginRight: '6px' } }, tg)),
-          (videosVal && videosVal.length > 0)
-            ? h('span', { className: 'tag tag-video', title: t('Video available') }, t('Video'))
-            : null
-        )
-      ),
-      h('div', { className: 'row' },
-        h('h5', null, h('span', { className: 'ic info2' }), ' ', t('Info')),
-        h('div', { className: 'block2 kv' },
+    h('div', { className: 'wrap detail-wrap' },
+      h('section', { className: 'detail-card' },
+        h('div', { className: 'detail-header' }, t('View Mode')),
+        h('div', { className: 'segmented detail' },
+          h('button', { className: 'segment-btn' + (viewMode === 'simple' ? ' active' : ''), onClick: () => setViewMode('simple') }, t('Simple')),
+          h('button', { className: 'segment-btn' + (viewMode === 'advanced' ? ' active' : ''), onClick: () => setViewMode('advanced') }, t('Advanced'))
+        ),
+        h('div', { className: 'detail-tags' },
+          isFav && h('span', { className: 'tag fav' }, '❤️ ', t('Favorite')),
+          (nonFavoriteTags || []).map((tg, i) => h('span', { key: i, className: 'tag' }, tg)),
+          (videosVal && videosVal.length > 0) ? h('span', { className: 'tag tag-video', title: t('Video available') }, t('Video')) : null
+        ),
+        h('div', { className: 'info-pills' },
           h('div', { className: 'pill health' }, h('span', { className: 'ic star' }), (r.healthScore ?? '-') + '/10'),
           h('div', { className: 'pill' }, h('span', { className: 'ic kcal' }), r.calories ?? '—', ' kcal'),
           h('div', { className: 'pill' }, h('span', { className: 'ic time' }), r.timeMinutes ?? '—', ' min'),
           h('div', { className: 'pill' }, h('span', { className: 'ic country' }), r.country || '')
         )
       ),
-      viewMode === 'simple' && h(Fragment, null,
-        h('div', { className: 'row' },
-          h('h5', null, h('span', { className: 'ic ingredients' }), ' ', t('Ingredients')),
-          h('div', { className: 'block2', id: 'dIngr' },
-            (ingredientsVal || []).length > 0
-              ? (ingredientsVal || []).map((i, idx) => h('span', { key: idx },
-                  i.name, (i.quantity ? ` — ${i.quantity} ${i.unit || ''}` : ''), idx < (ingredientsVal.length || 0) - 1 ? ', ' : ''))
-              : '—'
-          )
+      viewMode === 'simple' && h('section', { className: 'detail-card' },
+        h('div', { className: 'detail-header' }, t('Ingredients')),
+        h('p', { className: 'detail-body-text' },
+          (ingredientsVal || []).length > 0
+            ? (ingredientsVal || []).map((i, idx) => h('span', { key: idx },
+                i.name, (i.quantity ? ` — ${i.quantity} ${i.unit || ''}` : ''), idx < (ingredientsVal.length || 0) - 1 ? ', ' : ''))
+            : '—'
         ),
-        h('div', { className: 'row' },
-          h('h5', null, h('span', { className: 'ic prep' }), ' ', t('Preparation')),
-          h('div', { className: 'block2', id: 'dPrep' }, prepSimpleVal || '—')
-        )
+        h('div', { className: 'divider soft' }),
+        h('div', { className: 'detail-header' }, t('Preparation')),
+        h('p', { className: 'detail-body-text' }, prepSimpleVal || '—')
       ),
-      viewMode === 'advanced' && h('div', { id: 'rowAdvanced' },
-        h('div', { className: 'row' },
-          h('h5', null, h('span', { className: 'ic ingredients' }), ' Ingredients (with quantities)'),
-          h('div', { className: 'block2' },
-            (ingredientsVal || []).length > 0
-              ? h('ul', { style: { margin: 0, paddingLeft: '18px' } },
-                  ingredientsVal.map((i, idx) => h('li', { key: idx },
-                    i.name, (i.quantity ? ` — ${i.quantity} ${i.unit || ''}` : '')
-                  )))
-              : '—'
-          )
+      viewMode === 'advanced' && h('section', { className: 'detail-card stack', id: 'rowAdvanced' },
+        h('div', { className: 'detail-header' }, t('Ingredients')),
+        h('ul', { className: 'detail-list' },
+          (ingredientsVal || []).length > 0
+            ? ingredientsVal.map((i, idx) => h('li', { key: idx }, i.name, (i.quantity ? ` — ${i.quantity} ${i.unit || ''}` : '')))
+            : h('li', null, '—')
         ),
-        h('div', { className: 'row' },
-          h('h5', null, h('span', { className: 'ic optional' }), ' ', t('Optional / Enrichment')),
-          h('div', { className: 'block2' },
-            (optionalVal || []).length > 0
-              ? h('ul', { style: { margin: 0, paddingLeft: '18px' } },
-                  optionalVal.map((i, idx) => h('li', { key: idx },
-                    i.name, (i.quantity ? ` — ${i.quantity} ${i.unit || ''}` : '')
-                  )))
-              : '—'
-          )
+        h('div', { className: 'detail-header' }, t('Optional / Enrichment')),
+        h('ul', { className: 'detail-list' },
+          (optionalVal || []).length > 0
+            ? optionalVal.map((i, idx) => h('li', { key: idx }, i.name, (i.quantity ? ` — ${i.quantity} ${i.unit || ''}` : '')))
+            : h('li', null, '—')
         ),
-        h('div', { className: 'row' },
-          h('h5', null, h('span', { className: 'ic advprep' }), ' ', t('Preparation — Advanced')),
-          h('div', { className: 'block2' }, prepAdvVal || '—')
-        ),
-        h('div', { className: 'row' },
-          h('h5', null, h('span', { className: 'ic chef' }), ' ', t('Chef Tips')),
-          h('div', { className: 'block2' }, chefTipsVal || '—')
-        ),
-        h('div', { className: 'row' },
-          h('h5', null, h('span', { className: 'ic diet' }), ' ', t('Dietitian Tips & Macros')),
-          h('div', { className: 'block2' }, dietTipsVal || '—', h('div', { className: 'divider' }), macro)
-        ),
-        h('div', { className: 'row' },
-          h('h5', null, h('span', { className: 'ic videos2' }), ' ', t('Videos')),
-          h('div', { className: 'block2' },
-            (videosVal && videosVal.length > 0)
-              ? h('div', { className: 'videos' },
-                  videosVal.map((v, idx) =>
-                    h('a', { key: idx, className: 'vid-link', href: v.url, target: '_blank', rel: 'noopener noreferrer' },
-                      h('span', { className: 'dot' }), v.title || t('Video'))))
-              : '—'
-          )
-        )
+        h('div', { className: 'detail-header' }, t('Preparation — Advanced')),
+        h('p', { className: 'detail-body-text' }, prepAdvVal || '—'),
+        h('div', { className: 'detail-header' }, t('Chef Tips')),
+        h('p', { className: 'detail-body-text' }, chefTipsVal || '—'),
+        h('div', { className: 'detail-header' }, t('Dietitian Tips & Macros')),
+        h('p', { className: 'detail-body-text' }, dietTipsVal || '—'),
+        h('div', { className: 'macro-pill' }, macro),
+        h('div', { className: 'detail-header' }, t('Videos')),
+        (videosVal && videosVal.length > 0)
+          ? h('div', { className: 'videos' },
+              videosVal.map((v, idx) =>
+                h('a', { key: idx, className: 'vid-link', href: v.url, target: '_blank', rel: 'noopener noreferrer' },
+                  h('span', { className: 'dot' }), v.title || t('Video'))))
+          : h('p', { className: 'detail-body-text' }, '—')
       )
     )
   );

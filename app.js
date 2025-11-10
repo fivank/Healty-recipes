@@ -38,7 +38,8 @@ const TRANSLATIONS = {
     "Add": "Add","Import": "Import","Export": "Export","Reset (forget recipes)": "Reset (forget recipes)",
     "Search recipes…": "Search recipes…","Advanced": "Advanced","Select": "Select","Cancel Select": "Cancel Select",
     "Select All": "Select All","Share": "Share","Delete": "Delete","Saved": "Filtered recipes saved","of": "of",
-    "Advanced Search": "Advanced Filter","Filters": "Filters","Meal (OR inside)": "Meal (OR inside)","Diet": "Diet","Course": "Course",
+    "Advanced Search": "Advanced Filter","Filters": "Filters","Dietary Needs": "Dietary Needs","Cuisine": "Cuisine","Time to Cook": "Time to Cook",
+    "Simple": "Simple","Advanced": "Advanced","Meal (OR inside)": "Meal (OR inside)","Diet": "Diet","Course": "Course",
     "Constraints": "Constraints","Minimum Health Rating": "Minimum Health Rating","Maximum Calories (kcal)": "Maximum Calories (kcal)",
     "Max Preparation Time (minutes)": "Max Preparation Time (minutes)","Countries": "Countries","Reset": "Reset","Apply": "Apply",
     "Back": "Back","View Mode": "View Mode","Tags": "Tags","Info": "Info","Ingredients": "Ingredients","Preparation": "Preparation",
@@ -76,7 +77,8 @@ const TRANSLATIONS = {
     "Add": "Añadir","Import": "Importar","Export": "Exportar","Reset (forget recipes)": "Restablecer (olvidar recetas)",
     "Search recipes…": "Buscar recetas…","Advanced": "Avanzado","Select": "Seleccionar","Cancel Select": "Cancelar selección",
     "Select All": "Seleccionar todo","Share": "Compartir","Delete": "Eliminar","Saved": "Recetas filtradas guardadas","of": "de",
-    "Advanced Search": "Filtro avanzada","Filters": "Filtros","Meal (OR inside)": "Comida (OR dentro)","Diet": "Dieta","Course": "Curso",
+    "Advanced Search": "Filtro avanzada","Filters": "Filtros","Dietary Needs": "Necesidades dietéticas","Cuisine": "Cocina","Time to Cook": "Tiempo de cocción",
+    "Simple": "Simple","Advanced": "Avanzado","Meal (OR inside)": "Comida (OR dentro)","Diet": "Dieta","Course": "Curso",
     "Constraints": "Restricciones","Minimum Health Rating": "Puntuación mínima de salud","Maximum Calories (kcal)": "Calorías máximas (kcal)",
     "Max Preparation Time (minutes)": "Tiempo máximo de preparación (minutos)","Countries": "Países","Reset": "Restablecer","Apply": "Aplicar",
     "Back": "Atrás","View Mode": "Modo de vista","Tags": "Etiquetas","Info": "Información","Ingredients": "Ingredientes","Preparation": "Preparación",
@@ -111,7 +113,8 @@ const TRANSLATIONS = {
     "Add": "Hinzufügen","Import": "Importieren","Export": "Exportieren","Reset (forget recipes)": "Zurücksetzen (Rezepte vergessen)",
     "Search recipes…": "Rezepte suchen…","Advanced": "Erweitert","Select": "Auswählen","Cancel Select": "Auswahl abbrechen",
     "Select All": "Alle auswählen","Share": "Teilen","Delete": "Löschen","Saved": "Gespeicherte gefilterte Rezepte","of": "von",
-    "Advanced Search": "Erweiterte Filter","Filters": "Filter","Meal (OR inside)": "Mahlzeit (ODER innen)","Diet": "Ernährung","Course": "Gang",
+    "Advanced Search": "Erweiterte Filter","Filters": "Filter","Dietary Needs": "Ernährungsbedürfnisse","Cuisine": "Küche","Time to Cook": "Kochzeit",
+    "Simple": "Einfach","Advanced": "Fortgeschritten","Meal (OR inside)": "Mahlzeit (ODER innen)","Diet": "Ernährung","Course": "Gang",
     "Constraints": "Einschränkungen","Minimum Health Rating": "Mindestgesundheitsbewertung","Maximum Calories (kcal)": "Maximale Kalorien (kcal)",
     "Max Preparation Time (minutes)": "Maximale Zubereitungszeit (Minuten)","Countries": "Länder","Reset": "Zurücksetzen","Apply": "Anwenden",
     "Back": "Zurück","View Mode": "Ansicht","Tags": "Tags","Info": "Informationen","Ingredients": "Zutaten","Preparation": "Zubereitung",
@@ -149,7 +152,8 @@ const TRANSLATIONS = {
     "Add": "Ajouter","Import": "Importer","Export": "Exporter","Reset (forget recipes)": "Réinitialiser (oublier les recettes)",
     "Search recipes…": "Rechercher des recettes…","Advanced": "Avancé","Select": "Sélectionner","Cancel Select": "Annuler la sélection",
     "Select All": "Tout sélectionner","Share": "Partager","Delete": "Supprimer","Saved": "Recettes filtrées enregistrées","of": "sur",
-    "Advanced Search": "Recherche avancée","Filters": "Filtres","Meal (OR inside)": "Repas (OU à l'intérieur)","Diet": "Régime","Course": "Cours",
+    "Advanced Search": "Recherche avancée","Filters": "Filtres","Dietary Needs": "Besoins diététiques","Cuisine": "Cuisine","Time to Cook": "Temps de cuisson",
+    "Simple": "Simple","Advanced": "Avancé","Meal (OR inside)": "Repas (OU à l'intérieur)","Diet": "Régime","Course": "Cours",
     "Constraints": "Contraintes","Minimum Health Rating": "Note de santé minimale","Maximum Calories (kcal)": "Calories maximales (kcal)",
     "Max Preparation Time (minutes)": "Temps de préparation maximal (minutes)","Countries": "Pays","Reset": "Réinitialiser","Apply": "Appliquer",
     "Back": "Retour","View Mode": "Mode d'affichage","Tags": "Étiquettes","Info": "Infos","Ingredients": "Ingrédients","Preparation": "Préparation",
@@ -192,7 +196,7 @@ function defaultAdvanced() {
   return { meal: [], diet: [], course: [], countries: [], minHealth: 1, maxKcal: null, maxTime: null };
 }
 function defaultAdvCollapse() {
-  return { meal: false, diet: false, course: false, constraints: false, countries: false };
+  return { meal: true, diet: true, course: true, constraints: true, countries: true };
 }
 function buildDefaultAppState(overrides = {}) {
   return {
@@ -836,61 +840,74 @@ function App() {
   };
 
   // Advanced page
-  const AdvancedPage = h('section', { className: 'page', style: { display: 'block' }, id: 'pageAdvanced' },
-    h('header', null,
-      h('button', { className: 'back', onClick: closeAdvanced }, h('span', { className: 'ic back' }), ' ', t('Back')),
-      h('div', { className: 'title' }, t('Advanced Search')),
-      h('div', { style: { opacity: 0.7, fontSize: '12px' } }, t('Filters'))
+  const AdvancedPage = h('section', { className: 'page page-advanced', style: { display: 'block' }, id: 'pageAdvanced' },
+    h('header', { className: 'page-header filter' },
+      h('button', { className: 'page-link', onClick: closeAdvanced }, t('Back')),
+      h('div', { className: 'page-title-group' },
+        h('h2', { className: 'page-title' }, t('Advanced Search')),
+        h('p', { className: 'page-subtitle' }, t('Filters'))
+      ),
+      h('button', { className: 'icon-btn close', onClick: closeAdvanced, 'aria-label': t('Back') }, '✕')
     ),
     h('div', { className: 'wrap' },
-      h('div', { className: 'grid-adv' },
-        h('div', { className: 'block' },
-          h('h4', { onClick: () => toggleAdvCollapse('constraints'), style: { cursor: 'pointer' } }, (advCollapse.constraints ? '▾' : '▸') + ' ' + t('Constraints')),
-          advCollapse.constraints && h('div', { className: 'range' },
-            h('label', null, t('Minimum Health Rating'), ' ', h('span', null, `${advanced.minHealth}/10`)),
-            h('input', { type: 'range', min: 1, max: 10, step: 1, value: advanced.minHealth, onChange: e => setAdvanced(p => ({ ...p, minHealth: parseInt(e.target.value, 10) })) }),
-            h('label', null, t('Maximum Calories (kcal)'), ' ', h('span', null, advanced.maxKcal != null ? advanced.maxKcal : '—')),
-            h('input', { type: 'range', min: 0, max: 3000, step: 10, value: advanced.maxKcal != null ? advanced.maxKcal : 0, onChange: e => setAdvanced(p => ({ ...p, maxKcal: parseInt(e.target.value, 10) })) }),
-            h('input', { type: 'number', min: 0, max: 3000, step: 10, value: advanced.maxKcal != null ? advanced.maxKcal : '', onChange: e => setAdvanced(p => ({ ...p, maxKcal: e.target.value.trim() === '' ? null : parseInt(e.target.value, 10) })) }),
-            h('label', null, t('Max Preparation Time (minutes)'), ' ', h('span', null, advanced.maxTime != null ? advanced.maxTime : '—')),
-            h('input', { type: 'range', min: 0, max: 180, step: 5, value: advanced.maxTime != null ? advanced.maxTime : 0, onChange: e => setAdvanced(p => ({ ...p, maxTime: parseInt(e.target.value, 10) })) }),
-            h('input', { type: 'number', min: 0, max: 180, step: 5, value: advanced.maxTime != null ? advanced.maxTime : '', onChange: e => setAdvanced(p => ({ ...p, maxTime: e.target.value.trim() === '' ? null : parseInt(e.target.value, 10) })) })
+      h('div', { className: 'adv-stack' },
+        h('section', { className: 'adv-card' },
+          h('h3', null, t('Dietary Needs')),
+          h('div', { className: 'state-list pill' },
+            [...new Set(DIET)].map(d => h('button', {
+              key: d,
+              className: 'state-chip' + (advanced.diet.has(d) ? ' on' : ''),
+              onClick: () => toggleFilterSet('diet', d)
+            }, t(d)))
           )
         ),
-        h('div', { className: 'block' },
-          h('h4', { onClick: () => toggleAdvCollapse('meal'), style: { cursor: 'pointer' } }, (advCollapse.meal ? '▾' : '▸') + ' ' + t('Meal (OR inside)')),
-          advCollapse.meal && h('div', { className: 'state-list' },
-            MEAL.map(m => h('div', {
+        h('section', { className: 'adv-card' },
+          h('h3', null, t('Cuisine')),
+          h('div', { className: 'state-list pill' },
+            collectCountries.map(cty => h('button', {
+              key: cty,
+              className: 'state-chip flag' + (advanced.countries.has(cty) ? ' on' : ''),
+              onClick: () => toggleCountry(cty)
+            }, h('span', { className: 'flag' }, FLAG[cty] || '🏳️'), ' ', cty))
+          )
+        ),
+        h('section', { className: 'adv-card' },
+          h('h3', null, t('Meal (OR inside)')),
+          h('div', { className: 'state-list pill' },
+            MEAL.map(m => h('button', {
               key: m,
-              className: 'state' + (advanced.meal.has(m) ? ' on' : ''),
+              className: 'state-chip' + (advanced.meal.has(m) ? ' on' : ''),
               onClick: () => toggleFilterSet('meal', m)
-              // removed inline color style to unify appearance
             }, t(m)))
           ),
-          h('div', { className: 'divider' }),
-          h('h4', { onClick: () => toggleAdvCollapse('course'), style: { cursor: 'pointer' } }, (advCollapse.course ? '▾' : '▸') + ' ' + t('Course')),
-          advCollapse.course && h('div', { className: 'state-list' },
-            COURSE.map(c => h('div', { key: c, className: 'state' + (advanced.course.has(c) ? ' on' : ''), onClick: () => toggleFilterSet('course', c) }, t(c)))
+          h('div', { className: 'divider soft' }),
+          h('h3', null, t('Course')),
+          h('div', { className: 'state-list pill' },
+            COURSE.map(c => h('button', {
+              key: c,
+              className: 'state-chip' + (advanced.course.has(c) ? ' on' : ''),
+              onClick: () => toggleFilterSet('course', c)
+            }, t(c)))
           )
         ),
-        h('div', { className: 'block' },
-          h('h4', { onClick: () => toggleAdvCollapse('diet'), style: { cursor: 'pointer' } }, (advCollapse.diet ? '▾' : '▸') + ' ' + t('Diet')),
-          advCollapse.diet && h('div', { className: 'state-list' },
-            [...new Set(DIET)].map(d => h('div', { key: d, className: 'state' + (advanced.diet.has(d) ? ' on' : ''), onClick: () => toggleFilterSet('diet', d) }, t(d)))
-          )
-        ),
-        h('div', { className: 'block' },
-          h('h4', { onClick: () => toggleAdvCollapse('countries'), style: { cursor: 'pointer' } }, (advCollapse.countries ? '▾' : '▸') + ' ' + t('Countries')),
-          advCollapse.countries && h('div', { className: 'flag-list' },
-            collectCountries.map(cty => h('div', { key: cty, className: 'flag-item' + (advanced.countries.has(cty) ? ' on' : ''), onClick: () => toggleCountry(cty) },
-              h('span', { className: 'flag' }, FLAG[cty] || '🏳️'), h('span', null, cty)))
+        h('section', { className: 'adv-card range-card' },
+          h('h3', null, t('Time to Cook')),
+          h('div', { className: 'range-stack' },
+            h('label', null, t('Minimum Health Rating'), h('span', { className: 'range-value' }, `${advanced.minHealth}/10`)),
+            h('input', { type: 'range', min: 1, max: 10, step: 1, value: advanced.minHealth, onChange: e => setAdvanced(p => ({ ...p, minHealth: parseInt(e.target.value, 10) })) }),
+            h('label', null, t('Maximum Calories (kcal)'), h('span', { className: 'range-value' }, advanced.maxKcal != null ? advanced.maxKcal : '—')),
+            h('input', { type: 'range', min: 0, max: 3000, step: 10, value: advanced.maxKcal != null ? advanced.maxKcal : 0, onChange: e => setAdvanced(p => ({ ...p, maxKcal: parseInt(e.target.value, 10) })) }),
+            h('input', { type: 'number', min: 0, max: 3000, step: 10, value: advanced.maxKcal != null ? advanced.maxKcal : '', onChange: e => setAdvanced(p => ({ ...p, maxKcal: e.target.value.trim() === '' ? null : parseInt(e.target.value, 10) })) }),
+            h('label', null, t('Max Preparation Time (minutes)'), h('span', { className: 'range-value' }, advanced.maxTime != null ? advanced.maxTime : '—')),
+            h('input', { type: 'range', min: 0, max: 180, step: 5, value: advanced.maxTime != null ? advanced.maxTime : 0, onChange: e => setAdvanced(p => ({ ...p, maxTime: parseInt(e.target.value, 10) })) }),
+            h('input', { type: 'number', min: 0, max: 180, step: 5, value: advanced.maxTime != null ? advanced.maxTime : '', onChange: e => setAdvanced(p => ({ ...p, maxTime: e.target.value.trim() === '' ? null : parseInt(e.target.value, 10) })) })
           )
         )
       )
     ),
-    h('footer', null,
-      h('button', { className: 'btn', onClick: () => { clearAdvanced(); closeAdvanced(); } }, t('Reset')),
-      h('button', { className: 'btn primary', onClick: applyAdvanced }, t('Apply'))
+    h('footer', { className: 'page-footer filter' },
+      h('button', { className: 'btn ghost', onClick: () => { clearAdvanced(); closeAdvanced(); } }, t('Reset')),
+      h('button', { className: 'btn primary wide', onClick: applyAdvanced }, t('Apply'))
     )
   );
 
