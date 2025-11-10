@@ -50,59 +50,66 @@ export function RecipeEditor({ recipe, isCreate, onCancel, onSave, t, LANGS, FLA
     });
   };
 
-  return h('section', { className: 'page', style: { display: 'block' }, id: 'pageEditor' },
-    h('header', null,
-      h('button', { className: 'back', onClick: onCancel }, h('span', { className: 'ic back' }), ' ', t('Back')),
-      h('div', { className: 'title' }, isCreate ? t('Add Recipe') : t('Edit Recipe')),
-      h('div', { style: { opacity: 0.7, fontSize: '12px' } }, isCreate ? t('Creating') : t('Editing'))
+  return h('section', { className: 'page page-editor', style: { display: 'block' }, id: 'pageEditor' },
+    h('header', { className: 'page-header form' },
+      h('button', { className: 'page-link', onClick: onCancel }, t('Cancel')),
+      h('div', { className: 'page-title-group' },
+        h('h2', { className: 'page-title' }, isCreate ? t('Add Recipe') : t('Edit Recipe')),
+        h('p', { className: 'page-subtitle' }, isCreate ? t('Creating') : t('Editing'))
+      ),
+      h('button', { className: 'page-link save', onClick: () => onSave(r) }, t('Save'))
     ),
-    h('div', { className: 'wrap' },
-      h('div', { className: 'form-grid' },
-        h('div', { className: 'field' },
-          h('label', null, t('Country')),
-          h('select', { value: r.country, onChange: e => updateField('country', e.target.value) },
-            collectCountries.map(cty => h('option', { key: cty, value: cty }, (FLAG[cty] || '🏳️'), ' ', cty))
-          )
+    h('div', { className: 'wrap form-wrap' },
+      h('section', { className: 'form-card' },
+        h('div', { className: 'form-grid two-col' },
+          h('div', { className: 'field' },
+            h('label', null, t('Country')),
+            h('select', { value: r.country, onChange: e => updateField('country', e.target.value) },
+              collectCountries.map(cty => h('option', { key: cty, value: cty }, (FLAG[cty] || '🏳️'), ' ', cty))
+            )
+          ),
+          h('div', { className: 'field' }, h('label', null, t('Health Score (1–10)')),
+            h('input', { type: 'number', min: 1, max: 10, step: 1, value: r.healthScore, onChange: e => updateField('healthScore', parseInt(e.target.value, 10)) })),
+          h('div', { className: 'field' }, h('label', null, t('Calories (kcal)')),
+            h('input', { type: 'number', min: 0, step: 1, value: r.calories, onChange: e => updateField('calories', parseInt(e.target.value, 10)) })),
+          h('div', { className: 'field' }, h('label', null, t('Time (minutes)')),
+            h('input', { type: 'number', min: 0, step: 1, value: r.timeMinutes, onChange: e => updateField('timeMinutes', parseInt(e.target.value, 10)) })),
+          h('div', { className: 'field' }, h('label', null, t('Difficulty (text)')),
+            h('input', { value: r.difficulty, onChange: e => updateField('difficulty', e.target.value), placeholder: 'Easy / Medium / Hard' })),
+          h('div', { className: 'field' }, h('label', null, `${t('Protein')} (g)`),
+            h('input', { type: 'number', min: 0, step: 1, value: r.macros.protein, onChange: e => updateMacro('protein', parseFloat(e.target.value)) })),
+          h('div', { className: 'field' }, h('label', null, `${t('Fat')} (g)`),
+            h('input', { type: 'number', min: 0, step: 1, value: r.macros.fat, onChange: e => updateMacro('fat', parseFloat(e.target.value)) })),
+          h('div', { className: 'field' }, h('label', null, `${t('Carbs')} (g)`),
+            h('input', { type: 'number', min: 0, step: 1, value: r.macros.carbs, onChange: e => updateMacro('carbs', parseFloat(e.target.value)) }))
+        )
+      ),
+      h('section', { className: 'form-card' },
+        h('div', { className: 'lang-tabs' },
+          LANGS.map(code => h('button', { key: 'tab-' + code, className: 'tab-btn' + (editLangTab === code ? ' active' : ''), onClick: () => setEditLangTab(code) },
+            code === 'en' ? '🇬🇧 EN' : code === 'es' ? '🇪🇸 ES' : code === 'de' ? '🇩🇪 DE' : '🇫🇷 FR'))
         ),
-        h('div', { className: 'field' }, h('label', null, t('Health Score (1–10)')), h('input', { type: 'number', min: 1, max: 10, step: 1, value: r.healthScore, onChange: e => updateField('healthScore', parseInt(e.target.value, 10)) })),
-        h('div', { className: 'field' }, h('label', null, t('Calories (kcal)')), h('input', { type: 'number', min: 0, step: 1, value: r.calories, onChange: e => updateField('calories', parseInt(e.target.value, 10)) })),
-        h('div', { className: 'field' }, h('label', null, t('Time (minutes)')), h('input', { type: 'number', min: 0, step: 1, value: r.timeMinutes, onChange: e => updateField('timeMinutes', parseInt(e.target.value, 10)) })),
-        h('div', { className: 'field' }, h('label', null, t('Difficulty (text)')), h('input', { value: r.difficulty, onChange: e => updateField('difficulty', e.target.value), placeholder: 'Easy / Medium / Hard' })),
-        h('div', { className: 'field' }, h('label', null, `${t('Protein')} (g)`), h('input', { type: 'number', min: 0, step: 1, value: r.macros.protein, onChange: e => updateMacro('protein', parseFloat(e.target.value)) })),
-        h('div', { className: 'field' }, h('label', null, `${t('Fat')} (g)`), h('input', { type: 'number', min: 0, step: 1, value: r.macros.fat, onChange: e => updateMacro('fat', parseFloat(e.target.value)) })),
-        h('div', { className: 'field' }, h('label', null, `${t('Carbs')} (g)`), h('input', { type: 'number', min: 0, step: 1, value: r.macros.carbs, onChange: e => updateMacro('carbs', parseFloat(e.target.value)) }))
+        (() => {
+          const lc = editLangTab;
+          return h('div', { key: 'lang-' + lc, className: 'lang-panel' },
+            h('div', { className: 'field' }, h('label', null, t('Name'), ' (', lc.toUpperCase(), ')'),
+              h('input', { value: (r.i18n && r.i18n[lc] && r.i18n[lc].name) || '', onChange: e => updateLangField(lc, 'name', e.target.value) })),
+            h('div', { className: 'field' }, h('label', null, t('Tags (comma separated)'), ' (', lc.toUpperCase(), ')'),
+              h('input', { value: ((r.i18n && r.i18n[lc] && r.i18n[lc].tags) || []).join(', '), onChange: e => updateLangTags(lc, e.target.value) })),
+            h('div', { className: 'field' }, h('label', null, t('Preparation (Simple)'), ' (', lc.toUpperCase(), ')'),
+              h('textarea', { rows: 2, value: (r.i18n && r.i18n[lc] && r.i18n[lc].preparationSimple) || '', onChange: e => updateLangField(lc, 'preparationSimple', e.target.value) })),
+            h('div', { className: 'field' }, h('label', null, t('Preparation (Advanced)'), ' (', lc.toUpperCase(), ')'),
+              h('textarea', { rows: 3, value: (r.i18n && r.i18n[lc] && r.i18n[lc].preparationAdvanced) || '', onChange: e => updateLangField(lc, 'preparationAdvanced', e.target.value) })),
+            h('div', { className: 'field' }, h('label', null, t('Chef Tips'), ' (', lc.toUpperCase(), ')'),
+              h('textarea', { rows: 2, value: (r.i18n && r.i18n[lc] && r.i18n[lc].chefTips) || '', onChange: e => updateLangField(lc, 'chefTips', e.target.value) })),
+            h('div', { className: 'field' }, h('label', null, t('Dietitian Tips'), ' (', lc.toUpperCase(), ')'),
+              h('textarea', { rows: 2, value: (r.i18n && r.i18n[lc] && r.i18n[lc].dietitianTips) || '', onChange: e => updateLangField(lc, 'dietitianTips', e.target.value) }))
+          );
+        })()
       ),
-      h('div', { className: 'lang-tabs' },
-        LANGS.map(code => h('button', { key: 'tab-' + code, className: 'tab-btn' + (editLangTab === code ? ' active' : ''), onClick: () => setEditLangTab(code) },
-          code === 'en' ? '🇬🇧 EN' : code === 'es' ? '🇪🇸 ES' : code === 'de' ? '🇩🇪 DE' : '🇫🇷 FR'))
-      ),
-      (() => {
-        const lc = editLangTab;
-        return h('div', { key: 'lang-' + lc, style: { marginBottom: '12px' } },
-          h('h5', null, lc.toUpperCase()),
-          h('div', { className: 'field' }, h('label', null, t('Name'), ' (', lc.toUpperCase(), ')'),
-            h('input', { value: (r.i18n && r.i18n[lc] && r.i18n[lc].name) || '', onChange: e => updateLangField(lc, 'name', e.target.value) })
-          ),
-          h('div', { className: 'field' }, h('label', null, t('Tags (comma separated)'), ' (', lc.toUpperCase(), ')'),
-            h('input', { value: ((r.i18n && r.i18n[lc] && r.i18n[lc].tags) || []).join(', '), onChange: e => updateLangTags(lc, e.target.value) })
-          ),
-          h('div', { className: 'field' }, h('label', null, t('Preparation (Simple)'), ' (', lc.toUpperCase(), ')'),
-            h('textarea', { rows: 2, value: (r.i18n && r.i18n[lc] && r.i18n[lc].preparationSimple) || '', onChange: e => updateLangField(lc, 'preparationSimple', e.target.value) })
-          ),
-          h('div', { className: 'field' }, h('label', null, t('Preparation (Advanced)'), ' (', lc.toUpperCase(), ')'),
-            h('textarea', { rows: 3, value: (r.i18n && r.i18n[lc] && r.i18n[lc].preparationAdvanced) || '', onChange: e => updateLangField(lc, 'preparationAdvanced', e.target.value) })
-          ),
-          h('div', { className: 'field' }, h('label', null, t('Chef Tips'), ' (', lc.toUpperCase(), ')'),
-            h('textarea', { rows: 2, value: (r.i18n && r.i18n[lc] && r.i18n[lc].chefTips) || '', onChange: e => updateLangField(lc, 'chefTips', e.target.value) })
-          ),
-          h('div', { className: 'field' }, h('label', null, t('Dietitian Tips'), ' (', lc.toUpperCase(), ')'),
-            h('textarea', { rows: 2, value: (r.i18n && r.i18n[lc] && r.i18n[lc].dietitianTips) || '', onChange: e => updateLangField(lc, 'dietitianTips', e.target.value) })
-          )
-        );
-      })(),
-      h('div', { className: 'row' },
-        h('h5', null, t('Ingredients')),
-        h('div', { className: 'block2' },
+      h('section', { className: 'form-card' },
+        h('div', { className: 'form-card-title' }, t('Ingredients')),
+        h('div', { className: 'table-shell' },
           h('table', { className: 'tbl', id: 'tblIngr' },
             h('thead', null, h('tr', null, h('th', null, 'Name'), h('th', null, 'Qty'), h('th', null, 'Unit'), h('th', null))),
             h('tbody', null,
@@ -117,14 +124,14 @@ export function RecipeEditor({ recipe, isCreate, onCancel, onSave, t, LANGS, FLA
                 )))
             )
           ),
-          h('div', { className: 'inline', style: { marginTop: '8px' } },
+          h('div', { className: 'inline actions' },
             h('button', { className: 'mini-btn ok', onClick: addIngredient }, '+ ', t('Add ingredient'))
           )
         )
       ),
-      h('div', { className: 'row' },
-        h('h5', null, t('Optional Ingredients')),
-        h('div', { className: 'block2' },
+      h('section', { className: 'form-card' },
+        h('div', { className: 'form-card-title' }, t('Optional Ingredients')),
+        h('div', { className: 'table-shell' },
           h('table', { className: 'tbl', id: 'tblOpt' },
             h('thead', null, h('tr', null, h('th', null, 'Name'), h('th', null, 'Qty'), h('th', null, 'Unit'), h('th', null))),
             h('tbody', null,
@@ -139,14 +146,14 @@ export function RecipeEditor({ recipe, isCreate, onCancel, onSave, t, LANGS, FLA
                 )))
             )
           ),
-          h('div', { className: 'inline', style: { marginTop: '8px' } },
+          h('div', { className: 'inline actions' },
             h('button', { className: 'mini-btn ok', onClick: addOptional }, '+ ', t('Add optional'))
           )
         )
       ),
-      h('div', { className: 'row' },
-        h('h5', null, t('Videos')),
-        h('div', { className: 'block2' },
+      h('section', { className: 'form-card' },
+        h('div', { className: 'form-card-title' }, t('Videos')),
+        h('div', { className: 'table-shell' },
           h('table', { className: 'tbl', id: 'tblVid' },
             h('thead', null, h('tr', null, h('th', null, 'Title'), h('th', null, 'URL'), h('th', null))),
             h('tbody', null,
@@ -160,15 +167,11 @@ export function RecipeEditor({ recipe, isCreate, onCancel, onSave, t, LANGS, FLA
                 )))
             )
           ),
-          h('div', { className: 'inline', style: { marginTop: '8px' } },
+          h('div', { className: 'inline actions' },
             h('button', { className: 'mini-btn ok', onClick: addVideo }, '➕ ', t('Add video'))
           )
         )
       )
-    ),
-    h('footer', null,
-      h('button', { className: 'btn', onClick: onCancel }, t('Cancel')),
-      h('button', { className: 'btn primary', onClick: () => onSave(r) }, t('Save'))
     )
   );
 }
