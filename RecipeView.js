@@ -33,6 +33,14 @@ export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangFi
   }
   if (!thumbUrl) thumbUrl = DEFAULT_THUMB;
 
+  return h('section', { className: 'page page-detail pinned-controls', style: { display: 'block' }, id: 'pageDetail' },
+    h('div', { className: 'detail-hero' },
+      h('img', {
+        src: thumbUrl,
+        alt: nameVal || '',
+        onError: e => { e.target.onerror = null; e.target.src = DEFAULT_THUMB; }
+      }),
+      h('div', { className: 'hero-bar pinned' },
   return h('section', { className: 'page page-detail', style: { display: 'block' }, id: 'pageDetail' },
     h('div', { className: 'hero-shell' },
       h('div', { className: 'detail-hero' },
