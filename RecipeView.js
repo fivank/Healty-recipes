@@ -5,7 +5,7 @@ export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangFi
   const h = React.createElement;
 
   const r = recipe;
-  const [viewMode, setViewMode] = useState('simple');
+  const [viewMode, setViewMode] = useState('advanced');
 
   const { value: nameVal, warning: nameWarn } = getLangField(r, 'name');
   const { value: tagsVal } = getLangField(r, 'tags');
@@ -15,6 +15,7 @@ export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangFi
   const isFav = fromSet || fromTags;
   const combinedTags = Array.from(new Set([...(baseTags || []), ...((tagsVal || []))]));
   const nonFavoriteTags = combinedTags.filter(tag => (tag ?? '').toString().toLowerCase() !== 'favorite');
+  const detailTabLabels = (nonFavoriteTags || []).filter(Boolean);
 
   const { value: ingredientsVal } = getLangField(r, 'ingredients');
   const { value: optionalVal } = getLangField(r, 'optionalIngredients');
@@ -32,14 +33,14 @@ export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangFi
   }
   if (!thumbUrl) thumbUrl = DEFAULT_THUMB;
 
-  return h('section', { className: 'page page-detail', style: { display: 'block' }, id: 'pageDetail' },
+  return h('section', { className: 'page page-detail pinned-controls', style: { display: 'block' }, id: 'pageDetail' },
     h('div', { className: 'detail-hero' },
       h('img', {
         src: thumbUrl,
         alt: nameVal || '',
         onError: e => { e.target.onerror = null; e.target.src = DEFAULT_THUMB; }
       }),
-      h('div', { className: 'hero-bar' },
+      h('div', { className: 'hero-bar pinned' },
         h('button', { className: 'icon-btn ghost', onClick: onBack, 'aria-label': t('Back') }, '←'),
         h('div', { className: 'hero-actions' },
           h('button', { className: 'icon-btn ghost', onClick: onShare }, '🔗'),
@@ -49,9 +50,9 @@ export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangFi
       ),
       h('div', { className: 'hero-info' },
         h('div', { className: 'hero-meta' },
-          h('span', { className: 'hero-flag' }, FLAG[r.country] || '🏳️'),
-          h('span', { className: 'hero-time' }, h('span', { className: 'ic time' }), ' ', r.timeMinutes ?? '—', ' min'),
-          h('span', { className: 'hero-health' }, h('span', { className: 'ic star' }), ' ', r.healthScore ?? '-', '/10')
+          h('span', { className: 'meta-chip flag' }, FLAG[r.country] || '🏳️'),
+          h('span', { className: 'meta-chip' }, h('span', { className: 'ic time' }), ' ', r.timeMinutes ?? '—', ' min'),
+          h('span', { className: 'meta-chip health' }, h('span', { className: 'heart-icon', 'aria-hidden': 'true' }, '💚'), ' ', r.healthScore != null ? r.healthScore : '—')
         ),
         h('h2', { className: 'hero-title' },
           nameVal || t('Recipe'),
@@ -67,16 +68,12 @@ export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangFi
           h('button', { className: 'segment-btn' + (viewMode === 'simple' ? ' active' : ''), onClick: () => setViewMode('simple') }, t('Simple')),
           h('button', { className: 'segment-btn' + (viewMode === 'advanced' ? ' active' : ''), onClick: () => setViewMode('advanced') }, t('Advanced'))
         ),
-        h('div', { className: 'detail-tags' },
-          isFav && h('span', { className: 'tag fav' }, '❤️ ', t('Favorite')),
-          (nonFavoriteTags || []).map((tg, i) => h('span', { key: i, className: 'tag' }, tg)),
-          (videosVal && videosVal.length > 0) ? h('span', { className: 'tag tag-video', title: t('Video available') }, t('Video')) : null
+        (isFav || detailTabLabels.length > 0) && h('div', { className: 'detail-tags' },
+          isFav && h('span', { className: 'tab-chip fav' }, '❤️ ', t('Favorite')),
+          detailTabLabels.map((tg, i) => h('span', { key: i, className: 'tab-chip' }, tg))
         ),
-        h('div', { className: 'info-pills' },
-          h('div', { className: 'pill health' }, h('span', { className: 'ic star' }), (r.healthScore ?? '-') + '/10'),
-          h('div', { className: 'pill' }, h('span', { className: 'ic kcal' }), r.calories ?? '—', ' kcal'),
-          h('div', { className: 'pill' }, h('span', { className: 'ic time' }), r.timeMinutes ?? '—', ' min'),
-          h('div', { className: 'pill' }, h('span', { className: 'ic country' }), r.country || '')
+        r.calories != null && h('div', { className: 'info-pills' },
+          h('div', { className: 'pill' }, h('span', { className: 'ic kcal' }), r.calories, ' kcal')
         )
       ),
       viewMode === 'simple' && h('section', { className: 'detail-card' },
