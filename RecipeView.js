@@ -48,7 +48,7 @@ export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangFi
           onToggleFavorite && h('button', { className: 'icon-btn ghost heart', onClick: () => onToggleFavorite(r.id) }, isFav ? '❤️' : '🤍')
         )
       ),
-      h('div', { className: 'hero-info' },
+      h('div', { className: 'hero-info floating' },
         h('div', { className: 'hero-meta' },
           h('span', { className: 'meta-chip flag' }, FLAG[r.country] || '🏳️'),
           h('span', { className: 'meta-chip' }, h('span', { className: 'ic time' }), ' ', r.timeMinutes ?? '—', ' min'),
