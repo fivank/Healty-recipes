@@ -41,6 +41,16 @@ export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangFi
         onError: e => { e.target.onerror = null; e.target.src = DEFAULT_THUMB; }
       }),
       h('div', { className: 'hero-bar pinned' },
+  return h('section', { className: 'page page-detail', style: { display: 'block' }, id: 'pageDetail' },
+    h('div', { className: 'hero-shell' },
+      h('div', { className: 'detail-hero' },
+        h('img', {
+          src: thumbUrl,
+          alt: nameVal || '',
+          onError: e => { e.target.onerror = null; e.target.src = DEFAULT_THUMB; }
+        })
+      ),
+      h('div', { className: 'hero-bar floating' },
         h('button', { className: 'icon-btn ghost', onClick: onBack, 'aria-label': t('Back') }, '←'),
         h('div', { className: 'hero-actions' },
           h('button', { className: 'icon-btn ghost', onClick: onShare }, '🔗'),
@@ -48,7 +58,7 @@ export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangFi
           onToggleFavorite && h('button', { className: 'icon-btn ghost heart', onClick: () => onToggleFavorite(r.id) }, isFav ? '❤️' : '🤍')
         )
       ),
-      h('div', { className: 'hero-info' },
+      h('div', { className: 'hero-info floating' },
         h('div', { className: 'hero-meta' },
           h('span', { className: 'meta-chip flag' }, FLAG[r.country] || '🏳️'),
           h('span', { className: 'meta-chip' }, h('span', { className: 'ic time' }), ' ', r.timeMinutes ?? '—', ' min'),
