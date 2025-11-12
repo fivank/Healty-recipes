@@ -288,6 +288,7 @@ export function RecipeList(props) {
   );
 
   return h(Fragment, null,
-    h('div', { className: 'container main-view' }, Header, SearchBar, QuickFilters, Stats, Chips, SelectionBar, Grid)
+    h('div', { className: 'app-header-zone' }, Header),
+    h('div', { className: 'container main-view' }, SearchBar, QuickFilters, Stats, Chips, SelectionBar, Grid)
   );
 }
