@@ -163,7 +163,7 @@ export function RecipeList(props) {
 
   const filterToggleButton = hasActiveFilters && typeof setShowActiveFilters === 'function' ? h('button', {
     type: 'button',
-    className: 'btn soft sm filter-toggle' + (showActiveFilters ? ' active' : ''),
+    className: 'chip-button filter-toggle' + (showActiveFilters ? ' active' : ''),
     onClick: () => setShowActiveFilters(prev => !prev),
     'aria-pressed': showActiveFilters
   }, showActiveFilters ? t('Hide filters') : t('Show filters')) : null;
@@ -177,7 +177,7 @@ export function RecipeList(props) {
         placeholder: t('Search recipes…')
       })
     ),
-    h('div', { className: 'filter-controls' }, advancedButton, filterToggleButton)
+    h('div', { className: 'filter-controls' }, advancedButton)
   );
 
   const QuickFilters = h('div', { className: 'quick-filters' },
@@ -188,7 +188,8 @@ export function RecipeList(props) {
     h('button', {
       className: 'chip-button' + (favoritesOnly ? ' active' : ''),
       onClick: () => { if (!favoritesOnly) toggleFavorites(); }
-    }, '❤️ ', t('Show favorites'))
+    }, '❤️ ', t('Show favorites')),
+    filterToggleButton
   );
 
   const SelectionBar = selecting ? h('div', { className: 'selection-bar', role: 'region', 'aria-live': 'polite' },
