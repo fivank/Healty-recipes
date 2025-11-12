@@ -114,7 +114,7 @@ export function RecipeList(props) {
     h('div', { className: 'brand' },
       h('img', { className: 'logo', src: 'icons_and_graphs/app_icon.svg', alt: 'Healthy Recipes icon' }),
       h('div', { className: 'brand-copy' },
-        h('h1', { className: 'app-title' }, 'Simply Healthy'),
+        h('h1', { className: 'app-title' }, t('Simply Healthy')),
         h('p', { className: 'app-subtitle' }, t('Find easy, healthy recipes for every day') || 'Find easy, healthy recipes for every day')
       )
     ),
