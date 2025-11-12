@@ -184,6 +184,9 @@
     .card-media img{width:100%;height:100%;object-fit:cover;display:block;}
     .card-health{position:absolute;top:14px;left:14px;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,0.92);color:#2f5f47;font-weight:600;font-size:13px;box-shadow:0 12px 30px rgba(46,139,87,0.18);backdrop-filter:blur(6px);}
     .card-health .heart-icon{font-size:16px;line-height:1;}
+    .card-origin{position:absolute;top:14px;right:14px;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,0.92);color:#2f5f47;font-weight:600;font-size:12px;box-shadow:0 12px 30px rgba(46,139,87,0.18);backdrop-filter:blur(6px);}
+    .card-origin .origin-flag{font-size:16px;line-height:1;}
+    .card-origin .origin-name{text-transform:uppercase;letter-spacing:0.5px;font-size:11px;}
     .favorite-badge{position:absolute;bottom:12px;right:12px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.92);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 10px 24px rgba(46,139,87,0.18);}
     .card-body{display:flex;flex-direction:column;gap:10px;}
     .name{font-weight:600;font-family:'Poppins',sans-serif;font-size:17px;color:#1f3d2f;display:flex;align-items:center;gap:6px;}
@@ -435,6 +438,11 @@
 
     /* Hamburger menu */
     .menu{position:relative}
+    .menu-row{display:flex;gap:10px;align-items:center;}
+    .lang-menu{position:relative}
+    .lang-toggle{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:12px;border:1px solid var(--border);background:var(--surface);cursor:pointer;box-shadow:0 8px 18px rgba(46,139,87,0.12);font-size:20px;line-height:1;}
+    .lang-toggle:hover{background:#f2f5f8}
+    .lang-flag{font-size:20px;line-height:1;}
   .hamburger{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:12px;border:1px solid var(--border);background:var(--surface);cursor:pointer;box-shadow:0 8px 18px rgba(46,139,87,0.12);}
   .hamburger:hover{background:#f2f5f8}
     /* Ensure the hamburger icon has high contrast for visibility */
@@ -446,10 +454,17 @@
     }
     .menu-panel{position:absolute;top:46px;right:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:6px;min-width:220px;display:none;z-index:99}
     .menu.open .menu-panel{display:block}
+    .lang-panel{position:absolute;top:46px;right:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);padding:6px;min-width:180px;display:none;z-index:99}
+    .lang-menu.open .lang-panel{display:block}
     .menu-item{display:flex;align-items:center;gap:8px;width:100%;border:1px solid transparent;background:transparent;color:var(--text);padding:8px 10px;border-radius:10px;cursor:pointer}
     .menu-item:hover{background:#f6faf7;border-color:rgba(46,139,87,0.25)}
     .menu-sep{height:1px;background:var(--border);margin:6px 0}
     .menu-item .ic{opacity:1}
+    .lang-option{display:flex;align-items:center;gap:8px;width:100%;border:1px solid transparent;background:transparent;color:var(--text);padding:8px 10px;border-radius:10px;font-size:13px;cursor:pointer;}
+    .lang-option:hover{background:#f6faf7;border-color:rgba(46,139,87,0.25)}
+    .lang-option.active{background:rgba(46,139,87,0.12);border-color:rgba(46,139,87,0.35);}
+    .lang-option-flag{font-size:18px;line-height:1;}
+    .lang-option-label{flex:1;text-align:left;}
 
     .hidden{display:none !important;}
 
