@@ -10,7 +10,8 @@ export function RecipeList(props) {
     DEFAULT_THUMB, getLangField, extractVideoId, activeFilterChips,
     onImport, onExport, openEditor, resetRecipes,
     // ADD:
-    favoritesOnly, toggleFavorites, favoriteIds, cloudSave, cloudImport
+    favoritesOnly, toggleFavorites, favoriteIds, cloudSave, cloudImport,
+    showActiveFilters, setShowActiveFilters
   } = props;
 
   const h = React.createElement;
@@ -148,6 +149,25 @@ export function RecipeList(props) {
     )
   );
 
+  const advancedButton = h('button', {
+    type: 'button',
+    className: 'btn circle filter-button' + (hasActiveFilters ? ' active' : ''),
+    onClick: openAdvanced,
+    'aria-label': t('Advanced Filter'),
+    'aria-pressed': hasActiveFilters
+  },
+    h('span', { className: 'funnel-icon' + (hasActiveFilters ? ' active' : '') },
+      hasActiveFilters ? h('span', { className: 'filter-badge' }, activeFilterChips.length > 9 ? '9+' : activeFilterChips.length) : null
+    )
+  );
+
+  const filterToggleButton = hasActiveFilters && typeof setShowActiveFilters === 'function' ? h('button', {
+    type: 'button',
+    className: 'btn soft sm filter-toggle' + (showActiveFilters ? ' active' : ''),
+    onClick: () => setShowActiveFilters(prev => !prev),
+    'aria-pressed': showActiveFilters
+  }, showActiveFilters ? t('Hide filters') : t('Show filters')) : null;
+
   const SearchBar = h('div', { className: 'searchbar' },
     h('label', { className: 'search-field', title: 'Boolean: comma/+ = AND, / = OR, parentheses ()' },
       h('span', { className: 'ic search', 'aria-hidden': 'true' }),
@@ -157,16 +177,7 @@ export function RecipeList(props) {
         placeholder: t('Search recipes…')
       })
     ),
-    h('button', {
-      className: 'btn circle filter-button' + (hasActiveFilters ? ' active' : ''),
-      onClick: openAdvanced,
-      'aria-label': t('Advanced Filter'),
-      'aria-pressed': hasActiveFilters
-    },
-      h('span', { className: 'funnel-icon' + (hasActiveFilters ? ' active' : '') },
-        hasActiveFilters ? h('span', { className: 'filter-badge' }, activeFilterChips.length > 9 ? '9+' : activeFilterChips.length) : null
-      )
-    )
+    h('div', { className: 'filter-controls' }, advancedButton, filterToggleButton)
   );
 
   const QuickFilters = h('div', { className: 'quick-filters' },
@@ -197,13 +208,13 @@ export function RecipeList(props) {
     )
   );
 
-  const Chips = h('div', { className: 'filters-active', id: 'activeFilters' },
+  const Chips = showActiveFilters && hasActiveFilters ? h('div', { className: 'filters-active', id: 'activeFilters' },
     activeFilterChips.map((chip, idx) =>
       h('span', { key: idx, className: 'chip' },
         chip.label, ' ', h('span', { className: 'x', onClick: chip.onRemove }, '✕')
       )
     )
-  );
+  ) : null;
 
   const Grid = h('div', { className: 'grid', id: 'grid' },
     visibleRecipes.map(r => {

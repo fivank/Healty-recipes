@@ -39,7 +39,7 @@ const TRANSLATIONS = {
     "Search recipes…": "Search recipes…","Find easy, healthy recipes for every day": "Find easy, healthy recipes for every day",
     "Simply Healthy": "FreshBite","Advanced": "Advanced","Select": "Select","Cancel Select": "Cancel Select",
     "Select All": "Select All","Share": "Share","Delete": "Delete","Saved": "Filtered recipes saved","of": "of",
-    "Advanced Search": "Advanced Filter","Filters": "Filters","Dietary Needs": "Dietary Needs","Cuisine": "Cuisine","Time to Cook": "Time to Cook","Preferences": "Preferences",
+    "Advanced Search": "Advanced Filter","Filters": "Filters","Show filters": "Show filters","Hide filters": "Hide filters","Dietary Needs": "Dietary Needs","Cuisine": "Cuisine","Time to Cook": "Time to Cook","Preferences": "Preferences",
     "Simple": "Simple","Advanced": "Advanced","Meal (OR inside)": "Meal (OR inside)","Meal": "Meal","Diet": "Diet","Course": "Course",
     "Constraints": "Constraints","Minimum Health Rating": "Minimum Health Rating","Maximum Calories (kcal)": "Maximum Calories (kcal)",
     "Max Preparation Time (minutes)": "Max Preparation Time (minutes)","Countries": "Countries","Reset": "Reset","Apply": "Apply",
@@ -79,7 +79,7 @@ const TRANSLATIONS = {
     "Search recipes…": "Buscar recetas…","Find easy, healthy recipes for every day": "Encuentra recetas fáciles y saludables para cada día",
     "Simply Healthy": "FreshBite","Advanced": "Avanzado","Select": "Seleccionar","Cancel Select": "Cancelar selección",
     "Select All": "Seleccionar todo","Share": "Compartir","Delete": "Eliminar","Saved": "Recetas filtradas guardadas","of": "de",
-    "Advanced Search": "Filtro avanzada","Filters": "Filtros","Dietary Needs": "Necesidades dietéticas","Cuisine": "Cocina","Time to Cook": "Tiempo de cocción","Preferences": "Preferencias",
+    "Advanced Search": "Filtro avanzada","Filters": "Filtros","Show filters": "Ver filtros","Hide filters": "Ocultar filtros","Dietary Needs": "Necesidades dietéticas","Cuisine": "Cocina","Time to Cook": "Tiempo de cocción","Preferences": "Preferencias",
     "Simple": "Simple","Advanced": "Avanzado","Meal (OR inside)": "Comida (OR dentro)","Meal": "Comida","Diet": "Dieta","Course": "Curso",
     "Constraints": "Restricciones","Minimum Health Rating": "Puntuación mínima de salud","Maximum Calories (kcal)": "Calorías máximas (kcal)",
     "Max Preparation Time (minutes)": "Tiempo máximo de preparación (minutos)","Countries": "Países","Reset": "Restablecer","Apply": "Aplicar",
@@ -116,7 +116,7 @@ const TRANSLATIONS = {
     "Search recipes…": "Rezepte suchen…","Find easy, healthy recipes for every day": "Finde einfache, gesunde Rezepte für jeden Tag",
     "Simply Healthy": "FreshBite","Advanced": "Erweitert","Select": "Auswählen","Cancel Select": "Auswahl abbrechen",
     "Select All": "Alle auswählen","Share": "Teilen","Delete": "Löschen","Saved": "Gespeicherte gefilterte Rezepte","of": "von",
-    "Advanced Search": "Erweiterte Filter","Filters": "Filter","Dietary Needs": "Ernährungsbedürfnisse","Cuisine": "Küche","Time to Cook": "Kochzeit","Preferences": "Vorlieben",
+    "Advanced Search": "Erweiterte Filter","Filters": "Filter","Show filters": "Filter anzeigen","Hide filters": "Filter ausblenden","Dietary Needs": "Ernährungsbedürfnisse","Cuisine": "Küche","Time to Cook": "Kochzeit","Preferences": "Vorlieben",
     "Simple": "Einfach","Advanced": "Fortgeschritten","Meal (OR inside)": "Mahlzeit (ODER innen)","Meal": "Mahlzeit","Diet": "Ernährung","Course": "Gang",
     "Constraints": "Einschränkungen","Minimum Health Rating": "Mindestgesundheitsbewertung","Maximum Calories (kcal)": "Maximale Kalorien (kcal)",
     "Max Preparation Time (minutes)": "Maximale Zubereitungszeit (Minuten)","Countries": "Länder","Reset": "Zurücksetzen","Apply": "Anwenden",
@@ -156,7 +156,7 @@ const TRANSLATIONS = {
     "Search recipes…": "Rechercher des recettes…","Find easy, healthy recipes for every day": "Trouvez des recettes faciles et saines pour chaque jour",
     "Simply Healthy": "FreshBite","Advanced": "Avancé","Select": "Sélectionner","Cancel Select": "Annuler la sélection",
     "Select All": "Tout sélectionner","Share": "Partager","Delete": "Supprimer","Saved": "Recettes filtrées enregistrées","of": "sur",
-    "Advanced Search": "Recherche avancée","Filters": "Filtres","Dietary Needs": "Besoins diététiques","Cuisine": "Cuisine","Time to Cook": "Temps de cuisson","Preferences": "Préférences",
+    "Advanced Search": "Recherche avancée","Filters": "Filtres","Show filters": "Afficher les filtres","Hide filters": "Masquer les filtres","Dietary Needs": "Besoins diététiques","Cuisine": "Cuisine","Time to Cook": "Temps de cuisson","Preferences": "Préférences",
     "Simple": "Simple","Advanced": "Avancé","Meal (OR inside)": "Repas (OU à l'intérieur)","Meal": "Repas","Diet": "Régime","Course": "Cours",
     "Constraints": "Contraintes","Minimum Health Rating": "Note de santé minimale","Maximum Calories (kcal)": "Calories maximales (kcal)",
     "Max Preparation Time (minutes)": "Temps de préparation maximal (minutes)","Countries": "Pays","Reset": "Réinitialiser","Apply": "Appliquer",
@@ -210,6 +210,7 @@ function buildDefaultAppState(overrides = {}) {
     advanced: defaultAdvanced(),
     favorites: [],
     favoritesOnly: false,
+    showActiveFilters: false,
     lang: 'en',
     currentPage: 'list',
     detailRecipeId: null,
@@ -262,6 +263,7 @@ function migrateAppState(raw) {
   if (!LANGS.includes(migrated.lang)) migrated.lang = 'en';
   migrated.favoritesOnly = !!migrated.favoritesOnly;
   migrated.selecting = !!migrated.selecting;
+  migrated.showActiveFilters = !!migrated.showActiveFilters;
 
   return migrated;
 }
@@ -404,6 +406,7 @@ function App() {
   const [lang, setLang] = useState(() => (LANGS.includes(initialState.lang) ? initialState.lang : 'en'));
   const [advCollapse, setAdvCollapse] = useState(() => ({ ...defaultAdvCollapse(), ...(initialState.advCollapse || {}) }));
   const [favoritesOnly, setFavoritesOnly] = useState(!!initialState.favoritesOnly);
+  const [showActiveFilters, setShowActiveFilters] = useState(() => !!initialState.showActiveFilters);
   const [favoriteIds, setFavoriteIds] = useState(() => {
     const pref = new Set(sanitizeArray(initialState.favorites).filter(id => initialIdSet.has(id)));
     if (pref.size === 0) {
@@ -561,6 +564,7 @@ function App() {
     });
     setLang(LANGS.includes(sanitized.lang) ? sanitized.lang : 'en');
     setFavoritesOnly(!!sanitized.favoritesOnly);
+    setShowActiveFilters(!!sanitized.showActiveFilters);
 
     const favIds = sanitizeArray(sanitized.favorites).filter(id => validIds.has(id));
     if (favIds.length === 0) {
@@ -638,6 +642,7 @@ function App() {
       },
       favorites: Array.from(favoriteIds),
       favoritesOnly,
+      showActiveFilters,
       lang,
       currentPage: page,
       detailRecipeId: detailId,
@@ -668,6 +673,10 @@ function App() {
       onRemove: () => setFavoritesOnly(false)
     });
   }
+
+  useEffect(() => {
+    if (!activeFilterChips.length && showActiveFilters) setShowActiveFilters(false);
+  }, [activeFilterChips.length, showActiveFilters, setShowActiveFilters]);
 
   // Navigation and handlers
   const openDetail = r => { setDetailRecipe(r); setCurrentPage('detail'); };
@@ -1016,7 +1025,9 @@ function App() {
       toggleFavorites: toggleFavoritesOnly,
       favoriteIds,
       cloudSave: saveToFirebase,
-      cloudImport: importFromFirebase
+      cloudImport: importFromFirebase,
+      showActiveFilters,
+      setShowActiveFilters
     }),
     currentPage === 'advanced' && AdvancedPage,
     currentPage === 'detail' && detailRecipe && h(RecipeView, {
