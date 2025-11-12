@@ -112,7 +112,7 @@ export function RecipeList(props) {
 
   const Header = h('header', { className: 'app-header' },
     h('div', { className: 'brand' },
-      h('div', { className: 'logo', 'aria-hidden': 'true' }),
+      h('img', { className: 'logo', src: 'icons_and_graphs/app_icon.svg', alt: 'Healthy Recipes icon' }),
       h('div', { className: 'brand-copy' },
         h('h1', { className: 'app-title' }, 'Simply Healthy'),
         h('p', { className: 'app-subtitle' }, t('Find easy, healthy recipes for every day') || 'Find easy, healthy recipes for every day')
