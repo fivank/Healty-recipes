@@ -37,7 +37,7 @@ const TRANSLATIONS = {
   en: {
     "Add": "Add","Import": "Import","Export": "Export","Reset (forget recipes)": "Reset (forget recipes)",
     "Search recipes…": "Search recipes…","Find easy, healthy recipes for every day": "Find easy, healthy recipes for every day",
-    "Simply Healthy": "Simply Healthy","Advanced": "Advanced","Select": "Select","Cancel Select": "Cancel Select",
+    "Simply Healthy": "FreshBite","Advanced": "Advanced","Select": "Select","Cancel Select": "Cancel Select",
     "Select All": "Select All","Share": "Share","Delete": "Delete","Saved": "Filtered recipes saved","of": "of",
     "Advanced Search": "Advanced Filter","Filters": "Filters","Dietary Needs": "Dietary Needs","Cuisine": "Cuisine","Time to Cook": "Time to Cook","Preferences": "Preferences",
     "Simple": "Simple","Advanced": "Advanced","Meal (OR inside)": "Meal (OR inside)","Meal": "Meal","Diet": "Diet","Course": "Course",
@@ -77,7 +77,7 @@ const TRANSLATIONS = {
   es: {
     "Add": "Añadir","Import": "Importar","Export": "Exportar","Reset (forget recipes)": "Restablecer (olvidar recetas)",
     "Search recipes…": "Buscar recetas…","Find easy, healthy recipes for every day": "Encuentra recetas fáciles y saludables para cada día",
-    "Simply Healthy": "Simplemente Saludable","Advanced": "Avanzado","Select": "Seleccionar","Cancel Select": "Cancelar selección",
+    "Simply Healthy": "FreshBite","Advanced": "Avanzado","Select": "Seleccionar","Cancel Select": "Cancelar selección",
     "Select All": "Seleccionar todo","Share": "Compartir","Delete": "Eliminar","Saved": "Recetas filtradas guardadas","of": "de",
     "Advanced Search": "Filtro avanzada","Filters": "Filtros","Dietary Needs": "Necesidades dietéticas","Cuisine": "Cocina","Time to Cook": "Tiempo de cocción","Preferences": "Preferencias",
     "Simple": "Simple","Advanced": "Avanzado","Meal (OR inside)": "Comida (OR dentro)","Meal": "Comida","Diet": "Dieta","Course": "Curso",
@@ -114,7 +114,7 @@ const TRANSLATIONS = {
   de: {
     "Add": "Hinzufügen","Import": "Importieren","Export": "Exportieren","Reset (forget recipes)": "Zurücksetzen (Rezepte vergessen)",
     "Search recipes…": "Rezepte suchen…","Find easy, healthy recipes for every day": "Finde einfache, gesunde Rezepte für jeden Tag",
-    "Simply Healthy": "Einfach Gesund","Advanced": "Erweitert","Select": "Auswählen","Cancel Select": "Auswahl abbrechen",
+    "Simply Healthy": "FreshBite","Advanced": "Erweitert","Select": "Auswählen","Cancel Select": "Auswahl abbrechen",
     "Select All": "Alle auswählen","Share": "Teilen","Delete": "Löschen","Saved": "Gespeicherte gefilterte Rezepte","of": "von",
     "Advanced Search": "Erweiterte Filter","Filters": "Filter","Dietary Needs": "Ernährungsbedürfnisse","Cuisine": "Küche","Time to Cook": "Kochzeit","Preferences": "Vorlieben",
     "Simple": "Einfach","Advanced": "Fortgeschritten","Meal (OR inside)": "Mahlzeit (ODER innen)","Meal": "Mahlzeit","Diet": "Ernährung","Course": "Gang",
@@ -154,7 +154,7 @@ const TRANSLATIONS = {
   fr: {
     "Add": "Ajouter","Import": "Importer","Export": "Exporter","Reset (forget recipes)": "Réinitialiser (oublier les recettes)",
     "Search recipes…": "Rechercher des recettes…","Find easy, healthy recipes for every day": "Trouvez des recettes faciles et saines pour chaque jour",
-    "Simply Healthy": "Simplement Sain","Advanced": "Avancé","Select": "Sélectionner","Cancel Select": "Annuler la sélection",
+    "Simply Healthy": "FreshBite","Advanced": "Avancé","Select": "Sélectionner","Cancel Select": "Annuler la sélection",
     "Select All": "Tout sélectionner","Share": "Partager","Delete": "Supprimer","Saved": "Recettes filtrées enregistrées","of": "sur",
     "Advanced Search": "Recherche avancée","Filters": "Filtres","Dietary Needs": "Besoins diététiques","Cuisine": "Cuisine","Time to Cook": "Temps de cuisson","Preferences": "Préférences",
     "Simple": "Simple","Advanced": "Avancé","Meal (OR inside)": "Repas (OU à l'intérieur)","Meal": "Repas","Diet": "Régime","Course": "Cours",
