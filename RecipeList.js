@@ -6,6 +6,7 @@ export function RecipeList(props) {
     setSearchQuery, openAdvanced, enterSelection, exitSelection,
     selectAllVisible, openShare, bulkDelete, FLAG, t, menuOpen, setMenuOpen,
     setLang, FLAG_EMOJI, deleteRecipe, openDetail, toggleSelected,
+    lang, langMenuOpen, setLangMenuOpen,
     DEFAULT_THUMB, getLangField, extractVideoId, activeFilterChips,
     onImport, onExport, openEditor, resetRecipes,
     // ADD:
@@ -25,11 +26,20 @@ export function RecipeList(props) {
     h('span', { className: 'btn-label' }, selecting ? t('Cancel Select') : t('Select'))
   );
 
-  const menuControl = h('div', { className: 'menu' + (menuOpen ? ' open' : ''), id: 'menu' },
+  const menuControl = h('div', {
+        className: 'menu' + (menuOpen ? ' open' : ''),
+        id: 'menu',
+        onClick: e => e.stopPropagation()
+      },
         h('button', {
           className: 'hamburger',
-          onClick: e => { e.stopPropagation(); setMenuOpen(!menuOpen); },
-          'aria-label': 'Menu'
+          onClick: e => {
+            e.stopPropagation();
+            setLangMenuOpen(false);
+            setMenuOpen(!menuOpen);
+          },
+          'aria-label': 'Menu',
+          'aria-expanded': menuOpen
         }),
         h('div', { className: 'menu-panel', role: 'menu', 'aria-labelledby': 'hamburger' },
           h('button', { className: 'menu-item', onClick: () => { setMenuOpen(false); openEditor(null); } },
@@ -58,12 +68,45 @@ export function RecipeList(props) {
           h('div', { className: 'menu-sep' }),
           h('button', { className: 'menu-item', onClick: () => { setMenuOpen(false); resetRecipes(); } },
             h('span', { className: 'ic del' }), ' ', t('Reset (forget recipes)')),
-          h('div', { className: 'menu-sep' }),
-          h('div', { style: { padding: '4px 10px', fontSize: '12px', fontWeight: 700, opacity: 0.7 } }, t('Language')),
-          h('button', { className: 'menu-item', onClick: () => { setLang('en'); setMenuOpen(false); } }, FLAG_EMOJI.en, ' ', t('English')),
-          h('button', { className: 'menu-item', onClick: () => { setLang('es'); setMenuOpen(false); } }, FLAG_EMOJI.es, ' ', t('Spanish')),
-          h('button', { className: 'menu-item', onClick: () => { setLang('de'); setMenuOpen(false); } }, FLAG_EMOJI.de, ' ', t('German')),
-          h('button', { className: 'menu-item', onClick: () => { setLang('fr'); setMenuOpen(false); } }, FLAG_EMOJI.fr, ' ', t('French'))
+        )
+      );
+
+  const languageOptions = [
+    { code: 'en', label: t('English'), flag: FLAG_EMOJI.en },
+    { code: 'es', label: t('Spanish'), flag: FLAG_EMOJI.es },
+    { code: 'de', label: t('German'), flag: FLAG_EMOJI.de },
+    { code: 'fr', label: t('French'), flag: FLAG_EMOJI.fr }
+  ];
+
+  const languageControl = h('div', {
+        className: 'lang-menu' + (langMenuOpen ? ' open' : ''),
+        onClick: e => e.stopPropagation()
+      },
+        h('button', {
+          className: 'lang-toggle',
+          onClick: e => {
+            e.stopPropagation();
+            setMenuOpen(false);
+            setLangMenuOpen(!langMenuOpen);
+          },
+          'aria-haspopup': 'true',
+          'aria-expanded': langMenuOpen,
+          'aria-label': t('Language')
+        },
+          h('span', { className: 'lang-flag', 'aria-hidden': 'true' }, FLAG_EMOJI[lang] || '🌐')
+        ),
+        h('div', { className: 'lang-panel', role: 'menu' },
+          languageOptions.map(opt => h('button', {
+            key: opt.code,
+            className: 'lang-option' + (opt.code === lang ? ' active' : ''),
+            onClick: () => {
+              setLang(opt.code);
+              setLangMenuOpen(false);
+            }
+          },
+            h('span', { className: 'lang-option-flag', 'aria-hidden': 'true' }, opt.flag || '🌐'),
+            h('span', { className: 'lang-option-label' }, opt.label)
+          ))
         )
       );
 
@@ -77,7 +120,7 @@ export function RecipeList(props) {
     ),
     h('div', { className: 'header-actions' },
       h('div', { className: 'menu-stack' },
-        menuControl,
+        h('div', { className: 'menu-row' }, languageControl, menuControl),
         selectToggle
       )
     )
@@ -151,6 +194,8 @@ export function RecipeList(props) {
         else otherTranslated.push(translated);
       }
       const tabLabels = [...mealTranslated, ...otherTranslated.slice(0, 3)].filter(Boolean);
+      const countryName = typeof r.country === 'string' ? r.country.trim() : '';
+      const countryFlag = countryName ? (FLAG[countryName] || '🌍') : null;
       // Thumbnail
       let thumbUrl = null;
       const vidsVal = getLangField(r, 'videoLinks').value || [];
@@ -182,6 +227,10 @@ export function RecipeList(props) {
         h('div', { className: 'card-health' },
           h('span', { className: 'heart-icon', 'aria-hidden': 'true' }, '💚'),
           h('span', { className: 'health-value' }, r.healthScore != null ? r.healthScore : '—')
+        ),
+        countryName && h('div', { className: 'card-origin', title: countryName },
+          h('span', { className: 'origin-flag', 'aria-hidden': 'true' }, countryFlag),
+          h('span', { className: 'origin-name' }, countryName)
         ),
         isFav && h('div', { className: 'favorite-badge', title: t('Favorite') }, '❤️')
       ),

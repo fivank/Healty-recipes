@@ -398,6 +398,7 @@ function App() {
   const [editingRecipe, setEditingRecipe] = useState(() => (initialPage === 'editor' ? initialEditorDraft : null));
   const [isCreate, setIsCreate] = useState(() => (initialPage === 'editor' && initialState.editor ? !!initialState.editor.isCreate : false));
   const [menuOpen, setMenuOpen] = useState(false);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [shareRecipes, setShareRecipes] = useState([]);
   const [toastMsg, setToastMsg] = useState(null);
   const [lang, setLang] = useState(() => (LANGS.includes(initialState.lang) ? initialState.lang : 'en'));
@@ -451,6 +452,15 @@ function App() {
     Object.entries(vars).forEach(([k, v]) => { str = str.replace(new RegExp(`\\{${k}\\}`, 'g'), v); });
     return str;
   };
+
+  useEffect(() => {
+    const handleClickAway = () => {
+      setMenuOpen(false);
+      setLangMenuOpen(false);
+    };
+    document.addEventListener('click', handleClickAway);
+    return () => document.removeEventListener('click', handleClickAway);
+  }, []);
   const getLangField = (r, field) => {
     if (r?.i18n?.[lang]?.[field] !== undefined) {
       const val = r.i18n[lang][field];
@@ -590,6 +600,7 @@ function App() {
     setIsCreate(editorCreate);
     setCurrentPage(nextPage);
     setMenuOpen(false);
+    setLangMenuOpen(false);
     setShareRecipes([]);
     setToastMsg(null);
   }, []);
@@ -824,6 +835,7 @@ function App() {
       alert('Cloud save failed: ' + (err.message || err));
     } finally {
       setMenuOpen(false);
+      setLangMenuOpen(false);
     }
   };
   const importFromFirebase = async () => {
@@ -840,6 +852,7 @@ function App() {
       alert('Cloud import failed: ' + (err.message || err));
     } finally {
       setMenuOpen(false);
+      setLangMenuOpen(false);
     }
   };
 
@@ -993,6 +1006,9 @@ function App() {
       recipes, visibleRecipes, selectedIds, selecting, searchQuery, setSearchQuery, openAdvanced,
       enterSelection, exitSelection, selectAllVisible, openShare, bulkDelete,
       FLAG, t, menuOpen, setMenuOpen, setLang, FLAG_EMOJI, deleteRecipe, openDetail, toggleSelected,
+      lang,
+      langMenuOpen,
+      setLangMenuOpen,
       DEFAULT_THUMB, getLangField, extractVideoId, activeFilterChips, onImport: handleImport, onExport: handleExport,
       openEditor, resetRecipes,
       // ADD:
