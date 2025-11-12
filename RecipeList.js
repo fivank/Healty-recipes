@@ -15,24 +15,17 @@ export function RecipeList(props) {
   const h = React.createElement;
   const Fragment = React.Fragment;
 
-  const Header = h('header', { className: 'app-header' },
-    h('div', { className: 'brand' },
-      h('div', { className: 'logo', 'aria-hidden': 'true' }),
-      h('div', { className: 'brand-copy' },
-        h('h1', { className: 'app-title' }, t('Simply Healthy') || 'Simply Healthy'),
-        h('p', { className: 'app-subtitle' }, t('Find easy, healthy recipes for every day') || 'Find easy, healthy recipes for every day')
-      )
-    ),
-    h('div', { className: 'header-actions' },
-      h('button', {
-        className: 'btn soft icon',
-        onClick: () => (selecting ? exitSelection() : enterSelection()),
-        'aria-pressed': selecting,
-        'aria-label': selecting ? t('Cancel Select') : t('Select')
-      },
-      h('span', { className: selecting ? 'ic close' : 'ic sel' }),
-      h('span', { className: 'btn-label' }, selecting ? t('Cancel Select') : t('Select'))),
-      h('div', { className: 'menu' + (menuOpen ? ' open' : ''), id: 'menu' },
+  const selectToggle = h('button', {
+    className: 'btn soft icon select-toggle',
+    onClick: () => (selecting ? exitSelection() : enterSelection()),
+    'aria-pressed': selecting,
+    'aria-label': selecting ? t('Cancel Select') : t('Select')
+  },
+    h('span', { className: selecting ? 'ic close' : 'ic sel' }),
+    h('span', { className: 'btn-label' }, selecting ? t('Cancel Select') : t('Select'))
+  );
+
+  const menuControl = h('div', { className: 'menu' + (menuOpen ? ' open' : ''), id: 'menu' },
         h('button', {
           className: 'hamburger',
           onClick: e => { e.stopPropagation(); setMenuOpen(!menuOpen); },
@@ -72,6 +65,20 @@ export function RecipeList(props) {
           h('button', { className: 'menu-item', onClick: () => { setLang('de'); setMenuOpen(false); } }, FLAG_EMOJI.de, ' ', t('German')),
           h('button', { className: 'menu-item', onClick: () => { setLang('fr'); setMenuOpen(false); } }, FLAG_EMOJI.fr, ' ', t('French'))
         )
+      );
+
+  const Header = h('header', { className: 'app-header' },
+    h('div', { className: 'brand' },
+      h('div', { className: 'logo', 'aria-hidden': 'true' }),
+      h('div', { className: 'brand-copy' },
+        h('h1', { className: 'app-title' }, 'Simply Healthy'),
+        h('p', { className: 'app-subtitle' }, t('Find easy, healthy recipes for every day') || 'Find easy, healthy recipes for every day')
+      )
+    ),
+    h('div', { className: 'header-actions' },
+      h('div', { className: 'menu-stack' },
+        menuControl,
+        selectToggle
       )
     )
   );
@@ -196,7 +203,6 @@ export function RecipeList(props) {
   );
 
   return h(Fragment, null,
-    h('div', { className: 'container main-view' }, Header, SearchBar, QuickFilters, Stats, Chips, SelectionBar, Grid),
-    h('button', { className: 'floating-add', onClick: () => openEditor(null), 'aria-label': t('Add Recipe') }, h('span', { className: 'ic add' }))
+    h('div', { className: 'container main-view' }, Header, SearchBar, QuickFilters, Stats, Chips, SelectionBar, Grid)
   );
 }

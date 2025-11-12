@@ -9,6 +9,7 @@ export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangFi
 
   const { value: nameVal, warning: nameWarn } = getLangField(r, 'name');
   const { value: tagsVal } = getLangField(r, 'tags');
+  const { value: countryVal } = getLangField(r, 'country');
   const baseTags = Array.isArray(r.tags) ? r.tags : [];
   const fromSet = favoriteIds && typeof favoriteIds.has === 'function' ? favoriteIds.has(r.id) : false;
   const fromTags = baseTags.some(t => (t ?? '').toLowerCase() === 'favorite');
@@ -33,6 +34,10 @@ export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangFi
   }
   if (!thumbUrl) thumbUrl = DEFAULT_THUMB;
 
+  const countryName = (typeof countryVal === 'string' && countryVal.trim()) ? countryVal.trim() : (r.country || '');
+  const healthValue = r.healthScore != null ? r.healthScore : '—';
+  const timeLabel = r.timeMinutes != null ? `${r.timeMinutes} min` : '—';
+
   return h('section', { className: 'page page-detail pinned-controls', style: { display: 'block' }, id: 'pageDetail' },
     h('div', { className: 'detail-hero' },
       h('img', {
@@ -48,18 +53,31 @@ export function RecipeView({ recipe, onBack, onEdit, onShare, t, FLAG, getLangFi
           onToggleFavorite && h('button', { className: 'icon-btn ghost heart', onClick: () => onToggleFavorite(r.id) }, isFav ? '❤️' : '🤍')
         )
       ),
-      h('div', { className: 'hero-info floating' },
-        h('div', { className: 'hero-meta' },
-          h('span', { className: 'meta-chip flag' }, FLAG[r.country] || '🏳️'),
-          h('span', { className: 'meta-chip' }, h('span', { className: 'ic time' }), ' ', r.timeMinutes ?? '—', ' min'),
-          h('span', { className: 'meta-chip health' }, h('span', { className: 'heart-icon', 'aria-hidden': 'true' }, '💚'), ' ', r.healthScore != null ? r.healthScore : '—')
+    ),
+    h('div', { className: 'hero-info' },
+      h('div', { className: 'hero-meta' },
+        h('div', { className: 'meta-row primary' },
+          h('div', { className: 'meta-country' },
+            h('span', { className: 'flag', 'aria-hidden': 'true' }, FLAG[r.country] || '🏳️'),
+            countryName ? h('span', { className: 'country-name' }, countryName) : null
+          ),
+          h('div', { className: 'meta-health' },
+            h('span', { className: 'heart-icon', 'aria-hidden': 'true' }, '💚'),
+            h('span', { className: 'health-value' }, healthValue)
+          )
         ),
-        h('h2', { className: 'hero-title' },
-          nameVal || t('Recipe'),
-          nameWarn ? h('span', { title: 'English fallback', className: 'fallback-indicator' }, '*') : null
-        ),
-        h('p', { className: 'hero-sub' }, chefTipsVal || dietTipsVal || t('Dietitian Tips & Macros'))
-      )
+        h('div', { className: 'meta-row secondary' },
+          h('div', { className: 'meta-time' },
+            h('span', { className: 'ic time', 'aria-hidden': 'true' }),
+            h('span', { className: 'time-value' }, timeLabel)
+          )
+        )
+      ),
+      h('h2', { className: 'hero-title' },
+        nameVal || t('Recipe'),
+        nameWarn ? h('span', { title: 'English fallback', className: 'fallback-indicator' }, '*') : null
+      ),
+      h('p', { className: 'hero-sub' }, chefTipsVal || dietTipsVal || t('Dietitian Tips & Macros'))
     ),
     h('div', { className: 'wrap detail-wrap' },
       h('section', { className: 'detail-card' },
