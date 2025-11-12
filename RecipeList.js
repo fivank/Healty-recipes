@@ -16,13 +16,24 @@ export function RecipeList(props) {
   const h = React.createElement;
   const Fragment = React.Fragment;
 
+  const scrollToTop = () => {
+    const grid = document.getElementById('grid');
+    if (grid && typeof grid.scrollIntoView === 'function') {
+      grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const hasActiveFilters = Array.isArray(activeFilterChips) && activeFilterChips.length > 0;
+
   const selectToggle = h('button', {
-    className: 'btn soft icon select-toggle',
+    className: 'btn soft icon select-toggle' + (selecting ? ' active' : ''),
     onClick: () => (selecting ? exitSelection() : enterSelection()),
     'aria-pressed': selecting,
     'aria-label': selecting ? t('Cancel Select') : t('Select')
   },
-    h('span', { className: selecting ? 'ic close' : 'ic sel' }),
+    h('span', { className: 'bookmark-icon' + (selecting ? ' active' : ''), 'aria-hidden': 'true' }),
     h('span', { className: 'btn-label' }, selecting ? t('Cancel Select') : t('Select'))
   );
 
@@ -111,7 +122,18 @@ export function RecipeList(props) {
       );
 
   const Header = h('header', { className: 'app-header' },
-    h('div', { className: 'brand' },
+    h('div', {
+      className: 'brand',
+      role: 'button',
+      tabIndex: 0,
+      onClick: scrollToTop,
+      onKeyDown: e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          scrollToTop();
+        }
+      }
+    },
       h('img', { className: 'logo', src: 'icons_and_graphs/app_icon.svg', alt: 'Healthy Recipes icon' }),
       h('div', { className: 'brand-copy' },
         h('h1', { className: 'app-title' }, t('Simply Healthy')),
@@ -135,8 +157,16 @@ export function RecipeList(props) {
         placeholder: t('Search recipes…')
       })
     ),
-    h('button', { className: 'btn circle', onClick: openAdvanced, 'aria-label': t('Advanced Filter') },
-      h('span', { className: 'ic adv' }))
+    h('button', {
+      className: 'btn circle filter-button' + (hasActiveFilters ? ' active' : ''),
+      onClick: openAdvanced,
+      'aria-label': t('Advanced Filter'),
+      'aria-pressed': hasActiveFilters
+    },
+      h('span', { className: 'funnel-icon' + (hasActiveFilters ? ' active' : '') },
+        hasActiveFilters ? h('span', { className: 'filter-badge' }, activeFilterChips.length > 9 ? '9+' : activeFilterChips.length) : null
+      )
+    )
   );
 
   const QuickFilters = h('div', { className: 'quick-filters' },
@@ -246,7 +276,13 @@ export function RecipeList(props) {
         h('button', { className: 'btn cta sm', onClick: () => openDetail(r) }, h('span', { className: 'ic view' }), t('View recipe')),
         h('button', { className: 'btn soft sm danger', onClick: () => deleteRecipe(r.id) }, h('span', { className: 'ic del' }), t('Delete'))
       ),
-      h('div', { className: 'select-box' }, h('span', { className: 'select-tick' }), t('Select'))
+      h('div', { className: 'select-box' },
+        h('span', {
+          className: 'bookmark-icon' + (selected ? ' active' : ''),
+          'aria-hidden': 'true'
+        }),
+        t('Select')
+      )
     );
     })
   );
